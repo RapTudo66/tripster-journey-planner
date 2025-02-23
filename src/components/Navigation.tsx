@@ -7,9 +7,9 @@ export const Navigation = () => {
 
   const menuItems = [
     { name: "Dashboard", href: "/" },
-    { name: "My Trips", href: "/trips" },
-    { name: "Expenses", href: "/expenses" },
-    { name: "Profile", href: "/profile" },
+    { name: "Minhas Viagens", href: "/trips" },
+    { name: "Despesas", href: "/expenses" },
+    { name: "Perfil", href: "/profile" },
   ];
 
   return (

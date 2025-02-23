@@ -18,13 +18,13 @@ const Profile = () => {
     try {
       // Login logic will be implemented with Supabase later
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo de volta!",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Invalid credentials",
+        title: "Erro",
+        description: "Credenciais inválidas",
         variant: "destructive",
       });
     } finally {
@@ -39,13 +39,13 @@ const Profile = () => {
     try {
       // Register logic will be implemented with Supabase later
       toast({
-        title: "Registration Successful",
-        description: "Welcome to Tripster!",
+        title: "Registro realizado com sucesso",
+        description: "Bem-vindo ao Tripster!",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Registration failed",
+        title: "Erro",
+        description: "Falha no registro",
         variant: "destructive",
       });
     } finally {
@@ -59,28 +59,28 @@ const Profile = () => {
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="login">Entrar</TabsTrigger>
+            <TabsTrigger value="register">Registrar</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <div className="rounded-lg border bg-white p-8">
-              <h2 className="text-2xl font-semibold mb-6">Welcome Back</h2>
+              <h2 className="text-2xl font-semibold mb-6">Bem-vindo de Volta</h2>
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
+                  <Label htmlFor="login-email">E-mail</Label>
                   <Input
                     id="login-email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="Digite seu e-mail"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                  <Label htmlFor="login-password">Senha</Label>
                   <Input
                     id="login-password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder="Digite sua senha"
                     required
                   />
                 </div>
@@ -89,48 +89,48 @@ const Profile = () => {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Loading..." : "Login"}
+                  {isLoading ? "Carregando..." : "Entrar"}
                 </Button>
               </form>
             </div>
           </TabsContent>
           <TabsContent value="register">
             <div className="rounded-lg border bg-white p-8">
-              <h2 className="text-2xl font-semibold mb-6">Create Account</h2>
+              <h2 className="text-2xl font-semibold mb-6">Criar Conta</h2>
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="register-name">Full Name</Label>
+                  <Label htmlFor="register-name">Nome Completo</Label>
                   <Input
                     id="register-name"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder="Digite seu nome completo"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="register-email">Email</Label>
+                  <Label htmlFor="register-email">E-mail</Label>
                   <Input
                     id="register-email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="Digite seu e-mail"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="register-password">Password</Label>
+                  <Label htmlFor="register-password">Senha</Label>
                   <Input
                     id="register-password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Crie uma senha"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="register-confirm-password">Confirm Password</Label>
+                  <Label htmlFor="register-confirm-password">Confirmar Senha</Label>
                   <Input
                     id="register-confirm-password"
                     type="password"
-                    placeholder="Confirm your password"
+                    placeholder="Confirme sua senha"
                     required
                   />
                 </div>
@@ -139,7 +139,7 @@ const Profile = () => {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Loading..." : "Create Account"}
+                  {isLoading ? "Carregando..." : "Criar Conta"}
                 </Button>
               </form>
             </div>

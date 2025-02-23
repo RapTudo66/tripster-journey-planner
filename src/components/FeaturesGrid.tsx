@@ -5,23 +5,23 @@ export const FeaturesGrid = () => {
   const features = [
     {
       icon: Map,
-      title: "Interactive Maps",
-      description: "Visualize your journey with interactive maps and route planning.",
+      title: "Mapas Interativos",
+      description: "Visualize sua jornada com mapas interativos e planejamento de rotas.",
     },
     {
       icon: Wallet,
-      title: "Expense Tracking",
-      description: "Keep track of your travel expenses and stay within budget.",
+      title: "Controle de Despesas",
+      description: "Acompanhe seus gastos de viagem e mantenha-se dentro do orçamento.",
     },
     {
       icon: BarChart3,
-      title: "Analytics Dashboard",
-      description: "Get insights about your travel patterns and spending habits.",
+      title: "Painel Analítico",
+      description: "Obtenha insights sobre seus padrões de viagem e hábitos de gastos.",
     },
     {
       icon: Calendar,
-      title: "Trip Planning",
-      description: "Create detailed itineraries and organize your activities.",
+      title: "Planejamento de Viagem",
+      description: "Crie roteiros detalhados e organize suas atividades.",
     },
   ];
 
@@ -30,11 +30,11 @@ export const FeaturesGrid = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold text-neutral-800 mb-4">
-            Everything You Need for Perfect Travel Planning
+            Tudo que Você Precisa para um Planejamento Perfeito
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
-            Our comprehensive suite of tools helps you plan, track, and enjoy your
-            travels to the fullest.
+            Nosso conjunto completo de ferramentas ajuda você a planejar, 
+            acompanhar e aproveitar suas viagens ao máximo.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
