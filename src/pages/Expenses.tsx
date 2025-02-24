@@ -4,18 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Plus, Wallet } from "lucide-react";
-
-type Expense = {
-  id: string;
-  category: string;
-  amount: number;
-  description: string;
-  date: string;
-};
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { Expense } from "@/lib/supabase";
 
 const EXPENSE_CATEGORIES = [
   "Alimentação",
@@ -34,10 +29,47 @@ const Expenses = () => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleAddExpense = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      loadExpenses();
+    }
+  }, [user]);
+
+  const loadExpenses = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading expenses:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as despesas",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setExpenses(data || []);
+  };
+
+  const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para adicionar despesas",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!category || !amount || !description) {
       toast({
         title: "Erro",
@@ -47,15 +79,27 @@ const Expenses = () => {
       return;
     }
 
-    const newExpense: Expense = {
-      id: crypto.randomUUID(),
+    const newExpense = {
+      user_id: user.id,
       category,
       amount: parseFloat(amount),
       description,
-      date: new Date().toISOString(),
     };
 
-    setExpenses([...expenses, newExpense]);
+    const { error } = await supabase
+      .from('expenses')
+      .insert([newExpense]);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a despesa",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await loadExpenses();
     setCategory("");
     setAmount("");
     setDescription("");
@@ -197,7 +241,7 @@ const Expenses = () => {
                   {expenses.map((expense) => (
                     <tr key={expense.id} className="border-b">
                       <td className="p-2">
-                        {new Date(expense.date).toLocaleDateString('pt-BR')}
+                        {new Date(expense.created_at).toLocaleDateString('pt-BR')}
                       </td>
                       <td className="p-2">{expense.category}</td>
                       <td className="p-2">{expense.description}</td>
