@@ -20,13 +20,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Verifica o estado inicial da autenticação
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Inscreve-se para mudanças na autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
@@ -39,14 +37,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Iniciando registro...', { email, fullName });
       
+      // 1. Criar o usuário na autenticação
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
       });
 
       if (signUpError) {
@@ -54,23 +48,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw signUpError;
       }
 
-      console.log('Registro bem sucedido:', signUpData);
+      if (!signUpData.user?.id) {
+        throw new Error('ID do usuário não encontrado após registro');
+      }
 
-      // Criar perfil do usuário
+      console.log('Usuário criado com sucesso:', signUpData.user.id);
+
+      // 2. Criar o perfil do usuário
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert([{ 
-          id: signUpData.user?.id, 
-          full_name: fullName,
-          email: email 
-        }]);
+        .insert([
+          {
+            id: signUpData.user.id,
+            full_name: fullName,
+            email: email,
+            updated_at: new Date().toISOString()
+          }
+        ]);
 
       if (profileError) {
         console.error('Erro ao criar perfil:', profileError);
+        // Se falhar ao criar o perfil, podemos tentar deletar o usuário para manter consistência
+        await supabase.auth.admin.deleteUser(signUpData.user.id);
         throw profileError;
       }
 
       console.log('Perfil criado com sucesso');
+      
+      return signUpData;
     } catch (error) {
       console.error('Erro completo:', error);
       throw error;
@@ -78,19 +83,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) throw error;
-    navigate('/dashboard');
+      if (error) throw error;
+
+      setUser(data.user);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Erro no login:', error);
+      throw error;
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    navigate('/');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      navigate('/');
+    } catch (error) {
+      console.error('Erro no logout:', error);
+      throw error;
+    }
   };
 
   return (
