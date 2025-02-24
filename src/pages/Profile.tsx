@@ -30,10 +30,11 @@ const Profile = () => {
         description: "Bem-vindo de volta!",
       });
       navigate('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro no login:', error);
       toast({
-        title: "Erro",
-        description: "Credenciais inválidas",
+        title: "Erro no login",
+        description: error.message || "Credenciais inválidas",
         variant: "destructive",
       });
     } finally {
@@ -65,12 +66,14 @@ const Profile = () => {
       await signUp(email, password, fullName);
       toast({
         title: "Registro realizado com sucesso",
-        description: "Por favor, verifique seu e-mail para confirmar o registro",
+        description: "Confira seu e-mail para confirmar o registro",
       });
-    } catch (error) {
+      // Não navegamos automaticamente após o registro pois o usuário precisa confirmar o email
+    } catch (error: any) {
+      console.error('Erro no registro:', error);
       toast({
-        title: "Erro",
-        description: "Falha no registro",
+        title: "Erro no registro",
+        description: error.message || "Falha ao criar conta",
         variant: "destructive",
       });
     } finally {
@@ -153,6 +156,7 @@ const Profile = () => {
                     type="password"
                     placeholder="Crie uma senha"
                     required
+                    minLength={6}
                   />
                 </div>
                 <div className="space-y-2">
@@ -163,6 +167,7 @@ const Profile = () => {
                     type="password"
                     placeholder="Confirme sua senha"
                     required
+                    minLength={6}
                   />
                 </div>
                 <Button

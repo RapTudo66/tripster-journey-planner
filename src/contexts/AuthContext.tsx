@@ -36,24 +36,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      console.log('Iniciando registro...', { email, fullName });
+      
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    });
+      });
 
-    if (error) throw error;
+      if (signUpError) {
+        console.error('Erro no signUp:', signUpError);
+        throw signUpError;
+      }
 
-    // Criar perfil do usuário
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert([{ id: email, full_name: fullName }]);
+      console.log('Registro bem sucedido:', signUpData);
 
-    if (profileError) throw profileError;
+      // Criar perfil do usuário
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{ 
+          id: signUpData.user?.id, 
+          full_name: fullName,
+          email: email 
+        }]);
+
+      if (profileError) {
+        console.error('Erro ao criar perfil:', profileError);
+        throw profileError;
+      }
+
+      console.log('Perfil criado com sucesso');
+    } catch (error) {
+      console.error('Erro completo:', error);
+      throw error;
+    }
   };
 
   const signIn = async (email: string, password: string) => {
