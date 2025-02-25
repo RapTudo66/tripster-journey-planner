@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
     try {
       console.log('Iniciando registro...', { email, fullName });
       
@@ -75,7 +75,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log('Perfil criado com sucesso');
-      return signUpData;
     } catch (error) {
       console.error('Erro completo:', error);
       throw error;
