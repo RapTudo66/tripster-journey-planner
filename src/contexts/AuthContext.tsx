@@ -58,16 +58,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       console.log('Usuário criado com sucesso:', signUpData.user.id);
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: signUpData.user.id,
-            full_name: fullName,
-            email: email,
-            updated_at: new Date().toISOString()
-          }
-        ]);
+      // Aguarda um momento para garantir que o usuário esteja criado
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Tenta criar o perfil usando a função rpc personalizada
+      const { error: profileError } = await supabase.rpc('create_new_profile', {
+        user_id: signUpData.user.id,
+        user_email: email,
+        user_full_name: fullName
+      });
 
       if (profileError) {
         console.error('Erro ao criar perfil:', profileError);
