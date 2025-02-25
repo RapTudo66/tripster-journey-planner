@@ -37,10 +37,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Iniciando registro...', { email, fullName });
       
-      // 1. Criar o usuário na autenticação
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
       });
 
       if (signUpError) {
@@ -54,7 +58,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       console.log('Usuário criado com sucesso:', signUpData.user.id);
 
-      // 2. Criar o perfil do usuário
       const { error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -68,13 +71,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (profileError) {
         console.error('Erro ao criar perfil:', profileError);
-        // Se falhar ao criar o perfil, podemos tentar deletar o usuário para manter consistência
-        await supabase.auth.admin.deleteUser(signUpData.user.id);
         throw profileError;
       }
 
       console.log('Perfil criado com sucesso');
-      
       return signUpData;
     } catch (error) {
       console.error('Erro completo:', error);
