@@ -148,7 +148,7 @@ const Expenses = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="amount">Valor (R$)</Label>
+                <Label htmlFor="amount">Valor (€)</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -191,7 +191,7 @@ const Expenses = () => {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label={({ name, value }) => `${name}: R$ ${value.toFixed(2)}`}
+                    label={({ name, value }) => `${name}: ${value.toFixed(2)} €`}
                   >
                     {expensesByCategory.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -216,7 +216,7 @@ const Expenses = () => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="value" name="Valor (R$)" fill="#4F46E5" />
+                  <Bar dataKey="value" name="Valor (€)" fill="#4F46E5" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -246,7 +246,7 @@ const Expenses = () => {
                       <td className="p-2">{expense.category}</td>
                       <td className="p-2">{expense.description}</td>
                       <td className="p-2 text-right">
-                        R$ {expense.amount.toFixed(2)}
+                        {expense.amount.toFixed(2)} €
                       </td>
                     </tr>
                   ))}
@@ -263,7 +263,7 @@ const Expenses = () => {
                     <tr className="border-t font-semibold">
                       <td colSpan={3} className="p-2 text-right">Total:</td>
                       <td className="p-2 text-right">
-                        R$ {totalExpenses.toFixed(2)}
+                        {totalExpenses.toFixed(2)} €
                       </td>
                     </tr>
                   </tfoot>
