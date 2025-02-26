@@ -46,32 +46,43 @@ const NewTrip = () => {
 
     const newTrip = {
       user_id: user.id,
-      name: tripName,
+      title: tripName,  // Mudado de 'name' para 'title' para corresponder à coluna do banco
+      description: `Viagem para ${tripName}`,  // Adicionando uma descrição básica
       num_people: parseInt(numPeople),
     };
 
-    const { data, error } = await supabase
-      .from('trips')
-      .insert([newTrip])
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('trips')
+        .insert([newTrip])
+        .select()
+        .single();
 
-    if (error) {
+      if (error) {
+        console.error("Erro ao criar viagem:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível criar a viagem: " + error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Viagem criada",
+        description: "Sua viagem foi criada com sucesso",
+      });
+
+      // Redireciona para a página de despesas com o ID da viagem
+      navigate(`/expenses?trip=${data.id}`);
+    } catch (error) {
+      console.error("Erro ao criar viagem:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível criar a viagem",
+        description: "Ocorreu um erro inesperado ao criar a viagem",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Viagem criada",
-      description: "Sua viagem foi criada com sucesso",
-    });
-
-    // Redireciona para a página de despesas com o ID da viagem
-    navigate(`/expenses?trip=${data.id}`);
   };
 
   return (
