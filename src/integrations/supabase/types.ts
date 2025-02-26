@@ -81,6 +81,7 @@ export type Database = {
           description: string | null
           end_date: string | null
           id: string
+          num_people: number
           start_date: string | null
           title: string
           user_id: string
@@ -91,6 +92,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          num_people: number
           start_date?: string | null
           title: string
           user_id: string
@@ -101,6 +103,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          num_people?: number
           start_date?: string | null
           title?: string
           user_id?: string
