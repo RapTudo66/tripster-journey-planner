@@ -12,17 +12,66 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
 
 const NewTrip = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [tripName, setTripName] = useState("");
   const [numPeople, setNumPeople] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui vamos adicionar a lógica de criar viagem depois
-    // Por enquanto só redireciona para a página de despesas
-    navigate("/expenses");
+
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para criar uma viagem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!tripName || !numPeople) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newTrip = {
+      user_id: user.id,
+      name: tripName,
+      num_people: parseInt(numPeople),
+    };
+
+    const { data, error } = await supabase
+      .from('trips')
+      .insert([newTrip])
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar a viagem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Viagem criada",
+      description: "Sua viagem foi criada com sucesso",
+    });
+
+    // Redireciona para a página de despesas com o ID da viagem
+    navigate(`/expenses?trip=${data.id}`);
   };
 
   return (

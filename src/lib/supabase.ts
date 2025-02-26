@@ -13,9 +13,18 @@ export type Profile = {
   created_at: string;
 };
 
+export type Trip = {
+  id: string;
+  user_id: string;
+  name: string;
+  num_people: number;
+  created_at: string;
+};
+
 export type Expense = {
   id: string;
   user_id: string;
+  trip_id: string;
   category: string;
   amount: number;
   description: string;
