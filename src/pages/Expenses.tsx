@@ -11,6 +11,7 @@ import { Plus, Wallet } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Expense } from "@/lib/supabase";
+import { useSearchParams } from 'react-router-dom';
 
 const EXPENSE_CATEGORIES = [
   "Alimentação",
@@ -30,19 +31,22 @@ const Expenses = () => {
   const [description, setDescription] = useState("");
   const { toast } = useToast();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const tripId = searchParams.get('trip');
 
   useEffect(() => {
-    if (user) {
+    if (user && tripId) {
       loadExpenses();
     }
-  }, [user]);
+  }, [user, tripId]);
 
   const loadExpenses = async () => {
-    if (!user) return;
+    if (!user || !tripId) return;
 
     const { data, error } = await supabase
       .from('expenses')
       .select('*')
+      .eq('trip_id', tripId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -70,6 +74,15 @@ const Expenses = () => {
       return;
     }
 
+    if (!tripId) {
+      toast({
+        title: "Erro",
+        description: "ID da viagem não encontrado",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!category || !amount || !description) {
       toast({
         title: "Erro",
@@ -81,6 +94,7 @@ const Expenses = () => {
 
     const newExpense = {
       user_id: user.id,
+      trip_id: tripId,
       category,
       amount: parseFloat(amount),
       description,
@@ -91,6 +105,7 @@ const Expenses = () => {
       .insert([newExpense]);
 
     if (error) {
+      console.error("Erro ao salvar despesa:", error);
       toast({
         title: "Erro",
         description: "Não foi possível salvar a despesa",
@@ -118,6 +133,24 @@ const Expenses = () => {
   })).filter(cat => cat.value > 0);
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  if (!tripId) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-neutral-800">
+              Nenhuma viagem selecionada
+            </h1>
+            <p className="mt-2 text-neutral-600">
+              Por favor, selecione uma viagem para ver suas despesas
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
