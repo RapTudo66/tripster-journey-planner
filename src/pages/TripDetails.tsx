@@ -422,10 +422,10 @@ const TripDetails = () => {
 
     // Define a função de callback global
     window.initMap = () => {
-      if (!mapRef.current) return;
+      if (!mapRef.current || !window.google) return;
 
       // Cria o mapa centrado nas coordenadas da cidade
-      const map = new google.maps.Map(mapRef.current, {
+      const map = new window.google.maps.Map(mapRef.current, {
         center: cityCoordinates.current,
         zoom: 13,
         mapTypeControl: false,
@@ -443,8 +443,8 @@ const TripDetails = () => {
 
       // Adiciona marcadores para pontos de interesse (ícones vermelhos)
       pointsOfInterest.forEach((poi, index) => {
-        if (poi.location) {
-          const marker = new google.maps.Marker({
+        if (poi.location && window.google) {
+          const marker = new window.google.maps.Marker({
             position: poi.location,
             map: map,
             title: poi.name,
@@ -453,7 +453,7 @@ const TripDetails = () => {
               color: "white"
             },
             icon: {
-              path: google.maps.SymbolPath.CIRCLE,
+              path: window.google.maps.SymbolPath.CIRCLE,
               fillColor: "#FF5252",
               fillOpacity: 1,
               strokeColor: "#FFFFFF",
@@ -463,7 +463,7 @@ const TripDetails = () => {
           });
 
           // Adiciona uma janela de informações ao clicar no marcador
-          const infoWindow = new google.maps.InfoWindow({
+          const infoWindow = new window.google.maps.InfoWindow({
             content: `
               <div style="max-width: 200px;">
                 <h3 style="margin: 0; font-size: 16px;">${poi.name}</h3>
@@ -481,8 +481,8 @@ const TripDetails = () => {
 
       // Adiciona marcadores para restaurantes (ícones amarelos)
       restaurants.forEach((restaurant, index) => {
-        if (restaurant.location) {
-          const marker = new google.maps.Marker({
+        if (restaurant.location && window.google) {
+          const marker = new window.google.maps.Marker({
             position: restaurant.location,
             map: map,
             title: restaurant.name,
@@ -491,7 +491,7 @@ const TripDetails = () => {
               color: "white"
             },
             icon: {
-              path: google.maps.SymbolPath.CIRCLE,
+              path: window.google.maps.SymbolPath.CIRCLE,
               fillColor: "#FFC107",
               fillOpacity: 1,
               strokeColor: "#FFFFFF",
@@ -501,7 +501,7 @@ const TripDetails = () => {
           });
 
           // Adiciona uma janela de informações ao clicar no marcador
-          const infoWindow = new google.maps.InfoWindow({
+          const infoWindow = new window.google.maps.InfoWindow({
             content: `
               <div style="max-width: 200px;">
                 <h3 style="margin: 0; font-size: 16px;">${restaurant.name}</h3>
@@ -727,6 +727,7 @@ const TripDetails = () => {
 declare global {
   interface Window {
     initMap: () => void;
+    google: typeof google;
   }
 }
 
