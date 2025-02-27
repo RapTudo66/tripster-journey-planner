@@ -7,11 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Plus, Wallet } from "lucide-react";
+import { Plus, Wallet, CalendarIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Expense } from "@/lib/supabase";
 import { useSearchParams } from 'react-router-dom';
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const EXPENSE_CATEGORIES = [
   "Alimentação",
@@ -29,6 +33,7 @@ const Expenses = () => {
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [expenseDate, setExpenseDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -83,7 +88,7 @@ const Expenses = () => {
       return;
     }
 
-    if (!category || !amount || !description) {
+    if (!category || !amount || !description || !expenseDate) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos",
@@ -98,6 +103,7 @@ const Expenses = () => {
       category,
       amount: parseFloat(amount),
       description,
+      date: expenseDate.toISOString().split('T')[0],
     };
 
     const { error } = await supabase
@@ -118,6 +124,7 @@ const Expenses = () => {
     setCategory("");
     setAmount("");
     setDescription("");
+    setExpenseDate(new Date());
 
     toast({
       title: "Despesa adicionada",
@@ -202,6 +209,33 @@ const Expenses = () => {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label>Data da Despesa</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                      {expenseDate ? (
+                        format(expenseDate, "dd/MM/yyyy", { locale: ptBR })
+                      ) : (
+                        <span className="text-muted-foreground">Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={expenseDate}
+                      onSelect={setExpenseDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               <Button type="submit" className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Despesa
@@ -274,7 +308,9 @@ const Expenses = () => {
                   {expenses.map((expense) => (
                     <tr key={expense.id} className="border-b">
                       <td className="p-2">
-                        {new Date(expense.created_at).toLocaleDateString('pt-BR')}
+                        {expense.date 
+                          ? new Date(expense.date).toLocaleDateString('pt-BR')
+                          : new Date(expense.created_at).toLocaleDateString('pt-BR')}
                       </td>
                       <td className="p-2">{expense.category}</td>
                       <td className="p-2">{expense.description}</td>
