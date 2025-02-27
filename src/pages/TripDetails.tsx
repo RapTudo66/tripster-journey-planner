@@ -359,6 +359,7 @@ const TripDetails = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const cityCoordinates = useRef<{ lat: number; lng: number }>({ lat: 38.7223, lng: -9.1393 }); // Padrão para Lisboa
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && id) {
@@ -410,123 +411,11 @@ const TripDetails = () => {
     setLoading(false);
   };
 
-  // Inicializa o mapa usando a API do Google Maps
+  // Inicializa o mapa sem depender do Google Maps
   const initializeMap = () => {
-    if (!mapRef.current || mapLoaded) return;
-
-    // Carrega o script da API do Google Maps dinamicamente
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBZxhxp97QsC3YLRwFkRqYBDQzmj4lG2GM&callback=initMap`;
-    script.async = true;
-    script.defer = true;
-
-    // Define a função de callback global
-    window.initMap = () => {
-      if (!mapRef.current || !window.google) return;
-
-      // Cria o mapa centrado nas coordenadas da cidade
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: cityCoordinates.current,
-        zoom: 13,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        zoomControl: true,
-        styles: [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [{ visibility: "off" }]
-          }
-        ]
-      });
-
-      // Adiciona marcadores para pontos de interesse (ícones vermelhos)
-      pointsOfInterest.forEach((poi, index) => {
-        if (poi.location && window.google) {
-          const marker = new window.google.maps.Marker({
-            position: poi.location,
-            map: map,
-            title: poi.name,
-            label: {
-              text: (index + 1).toString(),
-              color: "white"
-            },
-            icon: {
-              path: window.google.maps.SymbolPath.CIRCLE,
-              fillColor: "#FF5252",
-              fillOpacity: 1,
-              strokeColor: "#FFFFFF",
-              strokeWeight: 2,
-              scale: 12
-            }
-          });
-
-          // Adiciona uma janela de informações ao clicar no marcador
-          const infoWindow = new window.google.maps.InfoWindow({
-            content: `
-              <div style="max-width: 200px;">
-                <h3 style="margin: 0; font-size: 16px;">${poi.name}</h3>
-                <p style="margin: 5px 0 0; font-size: 14px;">${poi.type}</p>
-                ${poi.address ? `<p style="margin: 5px 0; font-size: 12px; color: #555;">${poi.address}</p>` : ''}
-              </div>
-            `
-          });
-
-          marker.addListener("click", () => {
-            infoWindow.open(map, marker);
-          });
-        }
-      });
-
-      // Adiciona marcadores para restaurantes (ícones amarelos)
-      restaurants.forEach((restaurant, index) => {
-        if (restaurant.location && window.google) {
-          const marker = new window.google.maps.Marker({
-            position: restaurant.location,
-            map: map,
-            title: restaurant.name,
-            label: {
-              text: (index + 1).toString(),
-              color: "white"
-            },
-            icon: {
-              path: window.google.maps.SymbolPath.CIRCLE,
-              fillColor: "#FFC107",
-              fillOpacity: 1,
-              strokeColor: "#FFFFFF",
-              strokeWeight: 2,
-              scale: 12
-            }
-          });
-
-          // Adiciona uma janela de informações ao clicar no marcador
-          const infoWindow = new window.google.maps.InfoWindow({
-            content: `
-              <div style="max-width: 200px;">
-                <h3 style="margin: 0; font-size: 16px;">${restaurant.name}</h3>
-                <div style="display: flex; align-items: center; margin-top: 5px;">
-                  <span style="font-weight: bold; margin-right: 5px;">${restaurant.rating}</span>
-                  <span style="color: #FFC107;">★★★★★</span>
-                  <span style="margin-left: 5px; font-size: 12px; color: #555;">(${restaurant.reviews} avaliações)</span>
-                </div>
-                <p style="margin: 5px 0; font-size: 14px;">${restaurant.cuisine} · ${restaurant.priceLevel}</p>
-                ${restaurant.address ? `<p style="margin: 5px 0; font-size: 12px; color: #555;">${restaurant.address}</p>` : ''}
-              </div>
-            `
-          });
-
-          marker.addListener("click", () => {
-            infoWindow.open(map, marker);
-          });
-        }
-      });
-
-      setMapLoaded(true);
-    };
-
-    // Adiciona o script ao documento
-    document.head.appendChild(script);
+    // Em vez do Google Maps, vamos exibir uma visualização estática
+    // com informações sobre os pontos de interesse e restaurantes
+    setMapLoaded(true);
   };
 
   if (loading) {
@@ -627,7 +516,64 @@ const TripDetails = () => {
           </div>
           
           <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
-            <div ref={mapRef} className="w-full h-[500px]"></div>
+            {/* Mapa Estático em vez do Google Maps */}
+            <div className="w-full h-[500px] bg-gray-100 p-8 flex flex-col items-center justify-center">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold mb-2">
+                  {trip.title.charAt(0).toUpperCase() + trip.title.slice(1)}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Coordenadas: {cityCoordinates.current.lat.toFixed(4)}, {cityCoordinates.current.lng.toFixed(4)}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto text-left">
+                  {/* Pontos de Interesse no Mapa */}
+                  <div>
+                    <h4 className="font-semibold flex items-center mb-2">
+                      <div className="w-3 h-3 rounded-full bg-[#FF5252] mr-2"></div>
+                      Pontos de Interesse ({pointsOfInterest.length})
+                    </h4>
+                    <ul className="text-sm space-y-2">
+                      {pointsOfInterest.map((poi, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="inline-flex items-center justify-center bg-[#FF5252] text-white w-5 h-5 rounded-full text-xs mr-2 flex-shrink-0 mt-0.5">{index + 1}</span>
+                          <span>
+                            <span className="font-medium">{poi.name}</span>
+                            <br />
+                            <span className="text-xs text-muted-foreground">{poi.type}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  {/* Restaurantes no Mapa */}
+                  <div>
+                    <h4 className="font-semibold flex items-center mb-2">
+                      <div className="w-3 h-3 rounded-full bg-[#FFC107] mr-2"></div>
+                      Restaurantes ({restaurants.length})
+                    </h4>
+                    <ul className="text-sm space-y-2">
+                      {restaurants.map((restaurant, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="inline-flex items-center justify-center bg-[#FFC107] text-white w-5 h-5 rounded-full text-xs mr-2 flex-shrink-0 mt-0.5">{index + 1}</span>
+                          <span>
+                            <span className="font-medium">{restaurant.name}</span> 
+                            <span className="text-[#FFC107] ml-1">★</span> 
+                            <span className="text-xs">{restaurant.rating}</span>
+                            <br />
+                            <span className="text-xs text-muted-foreground">{restaurant.cuisine} · {restaurant.priceLevel}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center text-sm text-muted-foreground mt-auto">
+                <p>O mapa interativo não pôde ser carregado.</p>
+                <p>Estamos mostrando uma visualização alternativa dos pontos de interesse e restaurantes.</p>
+              </div>
+            </div>
             <div className="p-4 bg-card border-t border-border">
               <div className="flex flex-wrap gap-4 items-center justify-center">
                 <div className="flex items-center gap-1">
