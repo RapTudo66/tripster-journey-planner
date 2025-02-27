@@ -29,4 +29,5 @@ export type Expense = {
   amount: number;
   description: string;
   created_at: string;
+  date?: string; // Adicionando o campo date como opcional
 };
