@@ -226,26 +226,6 @@ const getMockRestaurants = (city: string): Restaurant[] => {
         location: { lat: 38.7232, lng: -9.1357 },
         address: "Av. Almirante Reis 1, 1150-007 Lisboa",
         reviews: 2187
-      },
-      {
-        name: "Ground Burguer",
-        rating: 4.3,
-        cuisine: "Hamburgueria",
-        priceLevel: "€€",
-        imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/0e/1b/e3/72/burger.jpg",
-        location: { lat: 38.7195, lng: -9.1487 },
-        address: "Avenidas Novas, Lisboa",
-        reviews: 392
-      },
-      {
-        name: "A Cultura do Hambúrguer",
-        rating: 4.6,
-        cuisine: "Hamburgueria",
-        priceLevel: "€€",
-        imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/12/31/e0/37/hamburguer-bacon-and.jpg",
-        location: { lat: 38.7103, lng: -9.1564 },
-        address: "Bairro Alto - Bica - Cais do Sodré, Lisboa",
-        reviews: 634
       }
     ];
   } else if (cityLower.includes("porto")) {
@@ -356,23 +336,13 @@ const TripDetails = () => {
   const { toast } = useToast();
   const [pointsOfInterest, setPointsOfInterest] = useState<PointOfInterest[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const mapRef = useRef<HTMLDivElement>(null);
   const cityCoordinates = useRef<{ lat: number; lng: number }>({ lat: 38.7223, lng: -9.1393 }); // Padrão para Lisboa
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && id) {
       loadTrip();
     }
   }, [user, id]);
-
-  // Efeito para inicializar o mapa após os dados serem carregados
-  useEffect(() => {
-    if (!loading && trip && mapRef.current && !mapLoaded) {
-      initializeMap();
-    }
-  }, [loading, trip, mapRef.current]);
 
   const loadTrip = async () => {
     if (!user || !id) return;
@@ -409,13 +379,6 @@ const TripDetails = () => {
     }
     
     setLoading(false);
-  };
-
-  // Inicializa o mapa sem depender do Google Maps
-  const initializeMap = () => {
-    // Em vez do Google Maps, vamos exibir uma visualização estática
-    // com informações sobre os pontos de interesse e restaurantes
-    setMapLoaded(true);
   };
 
   if (loading) {
@@ -516,74 +479,67 @@ const TripDetails = () => {
           </div>
           
           <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
-            {/* Mapa Estático em vez do Google Maps */}
-            <div className="w-full h-[500px] bg-gray-100 p-8 flex flex-col items-center justify-center">
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold mb-2">
-                  {trip.title.charAt(0).toUpperCase() + trip.title.slice(1)}
+            {/* Mapa Estático - Versão melhorada e limpa */}
+            <div className="w-full p-6 bg-gray-50">
+              <div className="text-center mb-4">
+                <h3 className="text-xl font-semibold">
+                  Viagem a {trip.title}
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  Coordenadas: {cityCoordinates.current.lat.toFixed(4)}, {cityCoordinates.current.lng.toFixed(4)}
+                <p className="text-sm text-muted-foreground mt-1">
+                  Coordenadas: {cityCoordinates.current.lat.toFixed(3)}, {cityCoordinates.current.lng.toFixed(3)}
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto text-left">
-                  {/* Pontos de Interesse no Mapa */}
-                  <div>
-                    <h4 className="font-semibold flex items-center mb-2">
-                      <div className="w-3 h-3 rounded-full bg-[#FF5252] mr-2"></div>
-                      Pontos de Interesse ({pointsOfInterest.length})
-                    </h4>
-                    <ul className="text-sm space-y-2">
-                      {pointsOfInterest.map((poi, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="inline-flex items-center justify-center bg-[#FF5252] text-white w-5 h-5 rounded-full text-xs mr-2 flex-shrink-0 mt-0.5">{index + 1}</span>
-                          <span>
-                            <span className="font-medium">{poi.name}</span>
-                            <br />
-                            <span className="text-xs text-muted-foreground">{poi.type}</span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  {/* Restaurantes no Mapa */}
-                  <div>
-                    <h4 className="font-semibold flex items-center mb-2">
-                      <div className="w-3 h-3 rounded-full bg-[#FFC107] mr-2"></div>
-                      Restaurantes ({restaurants.length})
-                    </h4>
-                    <ul className="text-sm space-y-2">
-                      {restaurants.map((restaurant, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="inline-flex items-center justify-center bg-[#FFC107] text-white w-5 h-5 rounded-full text-xs mr-2 flex-shrink-0 mt-0.5">{index + 1}</span>
-                          <span>
-                            <span className="font-medium">{restaurant.name}</span> 
-                            <span className="text-[#FFC107] ml-1">★</span> 
-                            <span className="text-xs">{restaurant.rating}</span>
-                            <br />
-                            <span className="text-xs text-muted-foreground">{restaurant.cuisine} · {restaurant.priceLevel}</span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
               </div>
-              <div className="text-center text-sm text-muted-foreground mt-auto">
-                <p>O mapa interativo não pôde ser carregado.</p>
-                <p>Estamos mostrando uma visualização alternativa dos pontos de interesse e restaurantes.</p>
-              </div>
-            </div>
-            <div className="p-4 bg-card border-t border-border">
-              <div className="flex flex-wrap gap-4 items-center justify-center">
+
+              <div className="flex justify-center gap-4 mt-2 mb-4">
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded-full bg-[#FF5252]"></div>
-                  <span className="text-sm text-muted-foreground">Pontos de Interesse</span>
+                  <span className="text-sm">Pontos de Interesse ({pointsOfInterest.length})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded-full bg-[#FFC107]"></div>
-                  <span className="text-sm text-muted-foreground">Restaurantes</span>
+                  <span className="text-sm">Restaurantes ({restaurants.length})</span>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                {/* Pontos de Interesse no Mapa */}
+                <div>
+                  <ul className="space-y-3">
+                    {pointsOfInterest.slice(0, 4).map((poi, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="inline-flex items-center justify-center bg-[#FF5252] text-white w-5 h-5 rounded-full text-xs mr-2 flex-shrink-0 mt-0.5">{index + 1}</span>
+                        <div>
+                          <div className="font-medium">{poi.name}</div>
+                          <div className="text-xs text-muted-foreground">{poi.type}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Restaurantes no Mapa */}
+                <div>
+                  <ul className="space-y-3">
+                    {restaurants.slice(0, 3).map((restaurant, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="inline-flex items-center justify-center bg-[#FFC107] text-white w-5 h-5 rounded-full text-xs mr-2 flex-shrink-0 mt-0.5">{index + 1}</span>
+                        <div>
+                          <div className="font-medium">{restaurant.name}</div>
+                          <div className="text-xs flex items-center">
+                            <span className="text-[#FFC107]">★</span>
+                            <span className="ml-1">{restaurant.rating}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">{restaurant.cuisine} · {restaurant.priceLevel}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="text-center text-xs text-muted-foreground mt-6 border-t border-gray-200 pt-4">
+                <p>O mapa interativo não pôde ser carregado.</p>
+                <p>Estamos mostrando uma visualização alternativa dos pontos de interesse e restaurantes.</p>
               </div>
             </div>
           </div>
@@ -668,13 +624,5 @@ const TripDetails = () => {
     </div>
   );
 };
-
-// Adiciona a definição do tipo global para a função de inicialização do mapa
-declare global {
-  interface Window {
-    initMap: () => void;
-    google: typeof google;
-  }
-}
 
 export default TripDetails;
