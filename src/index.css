@@ -75,3 +75,13 @@
     opacity: 1; 
   }
 }
+
+/* Adicionando animação de pulse para o cursor do typewriter */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-pulse {
+  animation: cursor-blink 1s ease-in-out infinite;
+}

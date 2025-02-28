@@ -18,12 +18,28 @@ const capitalImages = [
 
 export const HeroSection = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [typewriterText, setTypewriterText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const fullText = "Find out. Plan. Travel with magic!";
 
+  // Efeito para carregar imagem de fundo
   useEffect(() => {
     // Seleciona uma imagem aleatória das capitais
     const randomIndex = Math.floor(Math.random() * capitalImages.length);
     setBackgroundImage(capitalImages[randomIndex]);
   }, []);
+
+  // Efeito para o typewriter
+  useEffect(() => {
+    if (currentIndex < fullText.length) {
+      const timeout = setTimeout(() => {
+        setTypewriterText(prev => prev + fullText[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 100); // velocidade de digitação (100ms)
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, fullText]);
 
   return (
     <div className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
@@ -43,7 +59,8 @@ export const HeroSection = () => {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
         <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 animate-fade-in drop-shadow-lg">
-          Find out. Plan. Travel with magic!
+          {typewriterText}
+          <span className="animate-pulse">|</span>
         </h1>
         <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto animate-slide-up drop-shadow-md">
           Crie roteiros detalhados, controle despesas e visualize suas aventuras
