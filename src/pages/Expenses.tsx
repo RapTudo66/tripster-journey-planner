@@ -141,6 +141,19 @@ const Expenses = () => {
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
+  // Corrigido: Formatador customizado para o Recharts Tooltip
+  const formatTooltipValue = (value: any) => {
+    if (typeof value === 'number') {
+      return `${value.toFixed(2)} €`;
+    }
+    return `${value} €`;
+  };
+
+  // Corrigido: Formatador customizado para o label do Pie chart
+  const renderCustomizedLabel = ({ name, value }: { name: string, value: number }) => {
+    return `${name}: ${value.toFixed(2)} €`;
+  };
+
   if (!tripId) {
     return (
       <div className="min-h-screen bg-background">
@@ -262,13 +275,13 @@ const Expenses = () => {
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
-                      label={({ name, value }) => `${name}: ${value.toFixed(2)} €`}
+                      label={renderCustomizedLabel}
                     >
                       {expensesByCategory.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => [`${value.toFixed(2)} €`, 'Valor']} />
+                    <Tooltip formatter={(value) => [formatTooltipValue(value), 'Valor']} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -292,7 +305,7 @@ const Expenses = () => {
                     <XAxis dataKey="name" tick={{ fill: "#D1D5DB" }} />
                     <YAxis tick={{ fill: "#D1D5DB" }} />
                     <Tooltip
-                      formatter={(value) => [`${value.toFixed(2)} €`, 'Valor']}
+                      formatter={(value) => [formatTooltipValue(value), 'Valor']}
                       contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
                       labelStyle={{ color: '#F9FAFB' }}
                     />
