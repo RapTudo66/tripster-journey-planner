@@ -1,29 +1,30 @@
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 220 9% 15%;
+    --background: 260 33% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 220 9% 15%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 9% 15%;
-    --primary: 24 100% 60%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 259 83% 75%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 220 9% 95%;
-    --secondary-foreground: 220 9% 15%;
-    --muted: 220 9% 92%;
-    --muted-foreground: 220 9% 45%;
-    --accent: 24 100% 60%;
-    --accent-foreground: 220 9% 15%;
+    --secondary: 210 20% 98%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 260 20% 92%;
+    --muted-foreground: 257 8% 50%;
+    --accent: 43 81% 75%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 9% 85%;
-    --input: 220 9% 85%;
-    --ring: 24 100% 60%;
+    --border: 257 30% 90%;
+    --input: 257 30% 90%;
+    --ring: 259 83% 75%;
     --radius: 0.75rem;
   }
 }
@@ -43,3 +44,12 @@
     linear-gradient(to bottom, #F7FAFC 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+.bg-gradient-purple {
+  background: linear-gradient(135deg, #9b87f5 0%, #6E59A5 100%);
+}
+
+.bg-gradient-hero {
+  background: linear-gradient(to bottom right, #d6bcfa, #fff, #f0d58f);
+}
+

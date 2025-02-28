@@ -5,7 +5,7 @@ import { FeaturesGrid } from "@/components/FeaturesGrid";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Navigation />
       <HeroSection />
       <FeaturesGrid />

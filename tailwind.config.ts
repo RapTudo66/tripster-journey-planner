@@ -26,18 +26,18 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#4FD1C5",
-          light: "#B2F5EA",
-          dark: "#319795",
+          DEFAULT: "#9b87f5", // Roxo primário do logo
+          light: "#d6bcfa", // Roxo claro
+          dark: "#6E59A5", // Roxo escuro
         },
         secondary: {
           DEFAULT: "#F7FAFC",
-          foreground: "#2D3748",
+          foreground: "#1A1F2C", // Azul escuro do logo
         },
         accent: {
-          DEFAULT: "#FF6B6B",
-          light: "#FFA8A8",
-          dark: "#E03131",
+          DEFAULT: "#f0d58f", // Dourado do logo
+          light: "#fff0c2",
+          dark: "#d9b65f",
         },
         neutral: {
           50: "#F7FAFC",
