@@ -26,7 +26,7 @@ const EXPENSE_CATEGORIES = [
   "Outros"
 ];
 
-const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+const COLORS = ['#F97316', '#FDBA74', '#C2410C', '#FB923C', '#EA580C', '#FFB78C'];
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -143,14 +143,14 @@ const Expenses = () => {
 
   if (!tripId) {
     return (
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-background">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-neutral-800">
+            <h1 className="text-2xl font-bold text-foreground">
               Nenhuma viagem selecionada
             </h1>
-            <p className="mt-2 text-neutral-600">
+            <p className="mt-2 text-muted-foreground">
               Por favor, selecione uma viagem para ver suas despesas
             </p>
           </div>
@@ -160,21 +160,21 @@ const Expenses = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Formulário de Adição de Despesas */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h2 className="text-2xl font-bold text-neutral-800 mb-6 flex items-center gap-2">
-              <Wallet className="h-6 w-6" />
+          <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
+            <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+              <Wallet className="h-6 w-6 text-primary" />
               Adicionar Despesa
             </h2>
             <form onSubmit={handleAddExpense} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Categoria</Label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-input bg-background">
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,6 +196,7 @@ const Expenses = () => {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00"
+                  className="border-input bg-background"
                 />
               </div>
 
@@ -206,6 +207,7 @@ const Expenses = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Digite uma descrição"
+                  className="border-input bg-background"
                 />
               </div>
 
@@ -215,7 +217,7 @@ const Expenses = () => {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left font-normal"
+                      className="w-full justify-start text-left font-normal border-input bg-background"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                       {expenseDate ? (
@@ -225,18 +227,19 @@ const Expenses = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 z-50 bg-card border-border" align="start">
                     <Calendar
                       mode="single"
                       selected={expenseDate}
                       onSelect={setExpenseDate}
                       initialFocus
+                      className="bg-card text-foreground"
                     />
                   </PopoverContent>
                 </Popover>
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-primary hover:bg-primary-dark text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Despesa
               </Button>
@@ -244,84 +247,100 @@ const Expenses = () => {
           </div>
 
           {/* Gráfico de Pizza */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h2 className="text-2xl font-bold text-neutral-800 mb-6">
+          <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
+            <h2 className="text-2xl font-bold text-foreground mb-6">
               Distribuição de Despesas
             </h2>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={expensesByCategory}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label={({ name, value }) => `${name}: ${value.toFixed(2)} €`}
-                  >
-                    {expensesByCategory.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {expensesByCategory.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={expensesByCategory}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label={({ name, value }) => `${name}: ${value.toFixed(2)} €`}
+                    >
+                      {expensesByCategory.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value.toFixed(2)} €`, 'Valor']} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Nenhuma despesa registrada para mostrar no gráfico
+                </div>
+              )}
             </div>
           </div>
 
           {/* Gráfico de Barras */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm md:col-span-2">
-            <h2 className="text-2xl font-bold text-neutral-800 mb-6">
+          <div className="bg-card p-6 rounded-lg border border-border shadow-sm md:col-span-2">
+            <h2 className="text-2xl font-bold text-foreground mb-6">
               Despesas por Categoria
             </h2>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={expensesByCategory}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="value" name="Valor (€)" fill="#4F46E5" />
-                </BarChart>
-              </ResponsiveContainer>
+              {expensesByCategory.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={expensesByCategory}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="name" tick={{ fill: "#D1D5DB" }} />
+                    <YAxis tick={{ fill: "#D1D5DB" }} />
+                    <Tooltip
+                      formatter={(value) => [`${value.toFixed(2)} €`, 'Valor']}
+                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                      labelStyle={{ color: '#F9FAFB' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="value" name="Valor (€)" fill="#F97316" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Nenhuma despesa registrada para mostrar no gráfico
+                </div>
+              )}
             </div>
           </div>
 
           {/* Lista de Despesas */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm md:col-span-2">
-            <h2 className="text-2xl font-bold text-neutral-800 mb-6">
+          <div className="bg-card p-6 rounded-lg border border-border shadow-sm md:col-span-2">
+            <h2 className="text-2xl font-bold text-foreground mb-6">
               Histórico de Despesas
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Data</th>
-                    <th className="text-left p-2">Categoria</th>
-                    <th className="text-left p-2">Descrição</th>
-                    <th className="text-right p-2">Valor</th>
+                  <tr className="border-b border-border">
+                    <th className="text-left p-2 text-foreground">Data</th>
+                    <th className="text-left p-2 text-foreground">Categoria</th>
+                    <th className="text-left p-2 text-foreground">Descrição</th>
+                    <th className="text-right p-2 text-foreground">Valor</th>
                   </tr>
                 </thead>
                 <tbody>
                   {expenses.map((expense) => (
-                    <tr key={expense.id} className="border-b">
-                      <td className="p-2">
+                    <tr key={expense.id} className="border-b border-border">
+                      <td className="p-2 text-foreground">
                         {expense.date 
                           ? new Date(expense.date).toLocaleDateString('pt-BR')
                           : new Date(expense.created_at).toLocaleDateString('pt-BR')}
                       </td>
-                      <td className="p-2">{expense.category}</td>
-                      <td className="p-2">{expense.description}</td>
-                      <td className="p-2 text-right">
+                      <td className="p-2 text-foreground">{expense.category}</td>
+                      <td className="p-2 text-foreground">{expense.description}</td>
+                      <td className="p-2 text-right text-foreground">
                         {expense.amount.toFixed(2)} €
                       </td>
                     </tr>
                   ))}
                   {expenses.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="text-center p-4 text-neutral-500">
+                      <td colSpan={4} className="text-center p-4 text-muted-foreground">
                         Nenhuma despesa registrada
                       </td>
                     </tr>
@@ -329,9 +348,9 @@ const Expenses = () => {
                 </tbody>
                 {expenses.length > 0 && (
                   <tfoot>
-                    <tr className="border-t font-semibold">
-                      <td colSpan={3} className="p-2 text-right">Total:</td>
-                      <td className="p-2 text-right">
+                    <tr className="border-t border-border font-semibold">
+                      <td colSpan={3} className="p-2 text-right text-foreground">Total:</td>
+                      <td className="p-2 text-right text-primary">
                         {totalExpenses.toFixed(2)} €
                       </td>
                     </tr>

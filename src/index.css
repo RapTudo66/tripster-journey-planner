@@ -1,31 +1,30 @@
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 260 33% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 259 83% 75%;
+    --background: 220 10% 10%;
+    --foreground: 210 40% 98%;
+    --card: 220 12% 15%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 12% 15%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 24 95% 53%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 20% 98%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 260 20% 92%;
-    --muted-foreground: 257 8% 50%;
-    --accent: 43 81% 75%;
-    --accent-foreground: 222 47% 11%;
+    --secondary: 220 14% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 14% 20%;
+    --muted-foreground: 215 16% 70%;
+    --accent: 24 95% 53%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 257 30% 90%;
-    --input: 257 30% 90%;
-    --ring: 259 83% 75%;
-    --radius: 0.75rem;
+    --border: 220 20% 25%;
+    --input: 220 20% 25%;
+    --ring: 24 95% 53%;
+    --radius: 0.5rem;
   }
 }
 
@@ -39,17 +38,40 @@
   }
 }
 
-.bg-grid-neutral-100\/25 {
-  background-image: linear-gradient(to right, #F7FAFC 1px, transparent 1px),
-    linear-gradient(to bottom, #F7FAFC 1px, transparent 1px);
+.bg-grid-dark {
+  background-image: linear-gradient(to right, rgba(75, 85, 99, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(75, 85, 99, 0.2) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
-.bg-gradient-purple {
-  background: linear-gradient(135deg, #9b87f5 0%, #6E59A5 100%);
+.bg-gradient-orange {
+  background: linear-gradient(135deg, #F97316 0%, #C2410C 100%);
 }
 
-.bg-gradient-hero {
-  background: linear-gradient(to bottom right, #d6bcfa, #fff, #f0d58f);
+.bg-dark-overlay {
+  background: rgba(0, 0, 0, 0.6);
 }
 
+/* Corrige os seletores para que não mostrem o texto por baixo */
+.SelectContent {
+  z-index: 50;
+  background-color: hsl(var(--popover));
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Adiciona classes de animação para a imagem de fundo */
+.bg-image-fade-in {
+  animation: bg-fade-in 2s ease-out;
+}
+
+@keyframes bg-fade-in {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
