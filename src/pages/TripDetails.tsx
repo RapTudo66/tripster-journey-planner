@@ -427,7 +427,8 @@ const TripDetails = () => {
       const mapOptions: google.maps.MapOptions = {
         center: { lat, lng },
         zoom: 13,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        // Corrigindo a linha problemática - Usando string direta em vez de acessar MapTypeId
+        mapTypeId: 'roadmap', // Anteriormente: google.maps.MapTypeId.ROADMAP
         mapTypeControl: true,
         streetViewControl: true,
         fullscreenControl: true,
