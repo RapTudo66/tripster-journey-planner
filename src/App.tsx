@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
 import Trips from "./pages/Trips";
 import NewTrip from "./pages/NewTrip";
 import TripDetails from "./pages/TripDetails";
@@ -25,7 +24,7 @@ const App = () => (
           <Sonner />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Removed dashboard route */}
             <Route path="/trips" element={<Trips />} />
             <Route path="/trips/new" element={<NewTrip />} />
             <Route path="/trips/:id" element={<TripDetails />} />

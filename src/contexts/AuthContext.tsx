@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       setUser(data.user);
-      navigate('/dashboard');
+      navigate('/'); // Changed to redirect to homepage instead of dashboard
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;
