@@ -50,7 +50,7 @@ const Profile = () => {
         title: "Login realizado com sucesso",
         description: "Bem-vindo de volta!",
       });
-      navigate('/dashboard');
+      navigate('/'); // Corrigido para navegar para a página inicial
     } catch (error: any) {
       console.error('Erro no login:', error);
       toast({
