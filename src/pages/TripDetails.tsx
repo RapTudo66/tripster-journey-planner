@@ -1,4 +1,3 @@
-
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
@@ -43,7 +42,6 @@ interface Restaurant {
   reviews?: number;
 }
 
-// Função para obter coordenadas de acordo com a cidade
 const getCityCoordinates = (city: string): { lat: number; lng: number } => {
   const cityLower = city.toLowerCase();
   
@@ -57,6 +55,10 @@ const getCityCoordinates = (city: string): { lat: number; lng: number } => {
     return { lat: 41.9028, lng: 12.4964 };
   } else if (cityLower.includes("madrid")) {
     return { lat: 40.4168, lng: -3.7038 };
+  } else if (cityLower.includes("tokyo") || cityLower.includes("tóquio") || cityLower.includes("toquio")) {
+    return { lat: 35.6762, lng: 139.6503 };
+  } else if (cityLower.includes("japan") || cityLower.includes("japão") || cityLower.includes("japao")) {
+    return { lat: 36.2048, lng: 138.2529 }; // Centro do Japão
   } else {
     // Localização padrão (Lisboa)
     return { lat: 38.7223, lng: -9.1393 };
@@ -328,7 +330,6 @@ const getMockRestaurants = (city: string): Restaurant[] => {
   }
 };
 
-// Função para carregar o script do Google Maps
 const loadGoogleMapsScript = (callback: () => void) => {
   const script = document.createElement('script');
   script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDYCQCtkxeSRisRajDluEHW_BIpVEJzC-s&callback=initMap`;
@@ -358,7 +359,6 @@ const TripDetails = () => {
     }
   }, [user, id]);
 
-  // Define a função de inicialização do mapa no escopo global
   useEffect(() => {
     window.initMap = () => {
       if (mapRef.current && !googleMapRef.current && !mapLoaded) {
@@ -367,12 +367,10 @@ const TripDetails = () => {
     };
 
     return () => {
-      // Limpa a função global ao desmontar
       window.initMap = () => {};
     };
   }, [pointsOfInterest, restaurants]);
 
-  // Efeito para inicializar o mapa após os dados serem carregados
   useEffect(() => {
     if (!loading && trip && mapRef.current && !mapLoaded) {
       loadGoogleMapsScript(() => {
@@ -405,7 +403,6 @@ const TripDetails = () => {
 
     setTrip(data as Trip);
     
-    // Load points of interest and restaurants based on trip title
     if (data) {
       const city = data.title.split(" ").pop() || data.title;
       cityCoordinates.current = getCityCoordinates(city);
@@ -418,7 +415,6 @@ const TripDetails = () => {
     setLoading(false);
   };
 
-  // Inicializa o mapa do Google
   const initializeMap = () => {
     if (!mapRef.current || mapLoaded) return;
 
@@ -427,8 +423,7 @@ const TripDetails = () => {
       const mapOptions: google.maps.MapOptions = {
         center: { lat, lng },
         zoom: 13,
-        // Corrigindo a linha problemática - Usando string direta em vez de acessar MapTypeId
-        mapTypeId: 'roadmap', // Anteriormente: google.maps.MapTypeId.ROADMAP
+        mapTypeId: 'roadmap',
         mapTypeControl: true,
         streetViewControl: true,
         fullscreenControl: true,
@@ -446,11 +441,9 @@ const TripDetails = () => {
         ]
       };
 
-      // Cria o mapa
       const map = new google.maps.Map(mapRef.current, mapOptions);
       googleMapRef.current = map;
 
-      // Adiciona marcadores para pontos de interesse
       pointsOfInterest.forEach((poi, index) => {
         if (poi.location) {
           const marker = new google.maps.Marker({
@@ -471,7 +464,6 @@ const TripDetails = () => {
             }
           });
 
-          // Adiciona infowindow com detalhes do ponto
           const infowindow = new google.maps.InfoWindow({
             content: `
               <div style="max-width: 200px; font-family: Arial, sans-serif;">
@@ -488,7 +480,6 @@ const TripDetails = () => {
         }
       });
 
-      // Adiciona marcadores para restaurantes
       restaurants.forEach((restaurant, index) => {
         if (restaurant.location) {
           const marker = new google.maps.Marker({
@@ -509,7 +500,6 @@ const TripDetails = () => {
             }
           });
 
-          // Adiciona infowindow com detalhes do restaurante
           const infowindow = new google.maps.InfoWindow({
             content: `
               <div style="max-width: 200px; font-family: Arial, sans-serif;">
@@ -627,7 +617,6 @@ const TripDetails = () => {
           </div>
         </div>
 
-        {/* Mapa com pontos de interesse e restaurantes */}
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <MapIcon className="h-6 w-6 text-primary" />
@@ -635,7 +624,6 @@ const TripDetails = () => {
           </div>
           
           <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
-            {/* Mapa do Google */}
             <div ref={mapRef} className="w-full h-[500px]"></div>
             
             {mapError && (
@@ -659,7 +647,6 @@ const TripDetails = () => {
           </div>
         </div>
 
-        {/* Pontos de Interesse */}
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <MapPin className="h-6 w-6 text-primary" />
@@ -691,7 +678,6 @@ const TripDetails = () => {
           </div>
         </div>
 
-        {/* Restaurantes Recomendados */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Utensils className="h-6 w-6 text-primary" />
@@ -739,7 +725,6 @@ const TripDetails = () => {
   );
 };
 
-// Adiciona a definição do tipo global para a função de inicialização do mapa
 declare global {
   interface Window {
     initMap: () => void;
