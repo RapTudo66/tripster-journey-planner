@@ -7,7 +7,8 @@ import {
   Users, 
   Plane, 
   Trash2, 
-  AlertCircle 
+  AlertCircle,
+  MapPin 
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -32,6 +33,8 @@ interface Trip {
   start_date: string | null;
   end_date: string | null;
   num_people: number;
+  country?: string;
+  city?: string;
   created_at: string;
 }
 
@@ -105,7 +108,7 @@ const Trips = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-foreground">Minhas Viagens</h1>
-          <Link to="/trips/new">
+          <Link to="/newtrip">
             <Button className="bg-primary hover:bg-primary/90 text-white">
               <Plus className="h-4 w-4 mr-2" />
               Nova Viagem
@@ -128,6 +131,12 @@ const Trips = () => {
                   </div>
                   <p className="text-muted-foreground mb-4 line-clamp-2">{trip.description}</p>
                   <div className="space-y-2 text-sm text-muted-foreground">
+                    {trip.city && trip.country && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span>{trip.city}, {trip.country}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-primary" />
                       <span>

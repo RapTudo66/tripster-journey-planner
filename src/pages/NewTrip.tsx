@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, MapPin } from "lucide-react";
+import { CalendarIcon, MapPin, Globe } from "lucide-react";
+import { City, countries, getCitiesByCountry } from "@/utils/locationData";
 
 const NewTrip = () => {
   const navigate = useNavigate();
@@ -31,96 +32,29 @@ const NewTrip = () => {
   const { toast } = useToast();
   const [tripName, setTripName] = useState("");
   const [description, setDescription] = useState("");
-  const [cityName, setCityName] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedCity, setSelectedCity] = useState<string>("");
+  const [availableCities, setAvailableCities] = useState<City[]>([]);
   const [numPeople, setNumPeople] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [pointsOfInterest, setPointsOfInterest] = useState<string[]>([]);
-  const [showPointsOfInterest, setShowPointsOfInterest] = useState(false);
 
-  const handleCityChange = (city: string) => {
-    setCityName(city);
-    // Reset points of interest
-    setPointsOfInterest([]);
-    setShowPointsOfInterest(false);
-
-    // If city is provided, show points of interest
-    if (city.trim().length > 2) {
-      // Simulate fetching points of interest
-      // In a real app, this would be an API call
-      setTimeout(() => {
-        const mockPointsOfInterest = getMockPointsOfInterest(city);
-        setPointsOfInterest(mockPointsOfInterest);
-        setShowPointsOfInterest(true);
-      }, 500);
+  useEffect(() => {
+    if (selectedCountry) {
+      setAvailableCities(getCitiesByCountry(selectedCountry));
+      // Reset selected city when country changes
+      setSelectedCity("");
+    } else {
+      setAvailableCities([]);
     }
+  }, [selectedCountry]);
+
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country);
   };
 
-  const getMockPointsOfInterest = (city: string) => {
-    // This is a mockup, in a real app this would come from an API
-    const cityLower = city.toLowerCase();
-    
-    if (cityLower.includes("lisboa") || cityLower.includes("lisbon")) {
-      return [
-        "Torre de Belém",
-        "Mosteiro dos Jerónimos",
-        "Praça do Comércio",
-        "Castelo de São Jorge",
-        "Time Out Market",
-        "Oceanário de Lisboa",
-        "Alfama",
-        "Bairro Alto",
-      ];
-    } else if (cityLower.includes("porto")) {
-      return [
-        "Ponte Dom Luís I",
-        "Livraria Lello",
-        "Ribeira",
-        "Palácio da Bolsa",
-        "Clérigos",
-        "Caves do Vinho do Porto",
-        "Casa da Música"
-      ];
-    } else if (cityLower.includes("paris")) {
-      return [
-        "Torre Eiffel",
-        "Museu do Louvre",
-        "Notre-Dame",
-        "Arco do Triunfo",
-        "Montmartre",
-        "Jardim de Luxemburgo",
-        "Disneyland Paris"
-      ];
-    } else if (cityLower.includes("roma") || cityLower.includes("rome")) {
-      return [
-        "Coliseu",
-        "Fórum Romano",
-        "Vaticano",
-        "Fontana di Trevi",
-        "Panteão",
-        "Villa Borghese",
-        "Piazza Navona"
-      ];
-    } else if (cityLower.includes("madrid")) {
-      return [
-        "Museu do Prado",
-        "Parque do Retiro",
-        "Palácio Real",
-        "Plaza Mayor",
-        "Puerta del Sol",
-        "Estádio Santiago Bernabéu",
-        "Mercado San Miguel"
-      ];
-    } else {
-      return [
-        "Monumentos Históricos",
-        "Museus",
-        "Restaurantes típicos",
-        "Parques e jardins",
-        "Zonas comerciais",
-        "Atividades ao ar livre"
-      ];
-    }
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,7 +69,7 @@ const NewTrip = () => {
       return;
     }
 
-    if (!tripName || !numPeople) {
+    if (!tripName || !numPeople || !selectedCountry || !selectedCity) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios",
@@ -147,7 +81,9 @@ const NewTrip = () => {
     const newTrip = {
       user_id: user.id,
       title: tripName,
-      description: description || `Viagem para ${tripName}`,
+      description: description || `Viagem para ${selectedCity}, ${selectedCountry}`,
+      country: selectedCountry,
+      city: selectedCity,
       num_people: parseInt(numPeople),
       start_date: startDate ? startDate.toISOString().split('T')[0] : null,
       end_date: endDate ? endDate.toISOString().split('T')[0] : null,
@@ -175,8 +111,8 @@ const NewTrip = () => {
         description: "Sua viagem foi criada com sucesso",
       });
 
-      // Redireciona para a página de despesas com o ID da viagem
-      navigate(`/expenses?trip=${data.id}`);
+      // Redireciona para a página de detalhes da viagem
+      navigate(`/trips/${data.id}`);
     } catch (error) {
       console.error("Erro ao criar viagem:", error);
       toast({
@@ -217,38 +153,69 @@ const NewTrip = () => {
                 className="border-input"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cityName">Cidade</Label>
-              <div className="relative">
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 text-muted-foreground absolute left-3" />
-                  <Input
-                    id="cityName"
-                    value={cityName}
-                    onChange={(e) => handleCityChange(e.target.value)}
-                    placeholder="Ex: Lisboa, Paris, Roma..."
-                    className="pl-9 border-input"
-                  />
-                </div>
-                
-                {showPointsOfInterest && pointsOfInterest.length > 0 && (
-                  <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <h3 className="font-medium text-sm text-foreground mb-2">
-                      Pontos de interesse em {cityName}:
-                    </h3>
-                    <ul className="space-y-1">
-                      {pointsOfInterest.map((poi, index) => (
-                        <li key={index} className="text-sm text-muted-foreground flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
-                          {poi}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>País</Label>
+                <Select
+                  value={selectedCountry}
+                  onValueChange={handleCountryChange}
+                  required
+                >
+                  <SelectTrigger className="w-full border-input pl-9">
+                    <Globe className="h-4 w-4 text-muted-foreground absolute left-3" />
+                    <SelectValue placeholder="Selecione o país" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.name} value={country.name}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Cidade</Label>
+                <Select
+                  value={selectedCity}
+                  onValueChange={handleCityChange}
+                  disabled={!selectedCountry}
+                  required
+                >
+                  <SelectTrigger className="w-full border-input pl-9">
+                    <MapPin className="h-4 w-4 text-muted-foreground absolute left-3" />
+                    <SelectValue placeholder="Selecione a cidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCities.map((city) => (
+                      <SelectItem key={city.name} value={city.name}>
+                        {city.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
+
+            {selectedCity && selectedCountry && (
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <h3 className="font-medium text-sm text-foreground mb-2">
+                  Pontos de interesse em {selectedCity}:
+                </h3>
+                <ul className="space-y-1">
+                  {availableCities
+                    .find(city => city.name === selectedCity)
+                    ?.pointsOfInterest.map((poi, index) => (
+                      <li key={index} className="text-sm text-muted-foreground flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+                        {poi}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -324,7 +291,7 @@ const NewTrip = () => {
             </div>
 
             <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">
-              Criar Viagem e Adicionar Despesas
+              Criar Viagem
             </Button>
           </form>
         </div>
