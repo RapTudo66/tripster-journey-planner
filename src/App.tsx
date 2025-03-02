@@ -11,7 +11,7 @@ import TripDetails from './pages/TripDetails';
 import PointOfInterestDetail from './pages/PointOfInterestDetail';
 import NotFound from './pages/NotFound';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+import { ThemeProvider } from './components/ui/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './App.css';
@@ -22,8 +22,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <AuthProvider>
-          <Router>
+        <Router>
+          <AuthProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/profile" element={<Profile />} />
@@ -35,9 +35,9 @@ function App() {
               <Route path="/expenses" element={<Expenses />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </Router>
-          <Toaster />
-        </AuthProvider>
+            <Toaster />
+          </AuthProvider>
+        </Router>
       </ThemeProvider>
     </QueryClientProvider>
   );
