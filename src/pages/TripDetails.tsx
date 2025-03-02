@@ -60,7 +60,6 @@ const getCityCoordinates = (city: string): { lat: number; lng: number } => {
   } else if (cityLower.includes("japan") || cityLower.includes("japão") || cityLower.includes("japao")) {
     return { lat: 36.2048, lng: 138.2529 }; // Centro do Japão
   } else {
-    // Localização padrão (Lisboa)
     return { lat: 38.7223, lng: -9.1393 };
   }
 };
@@ -163,7 +162,6 @@ const getMockPointsOfInterest = (city: string): PointOfInterest[] => {
       }
     ];
   } else {
-    // Usar algumas coordenadas fictícias próximas ao centro da cidade para o caso de cidades não específicas
     return [
       {
         name: "Monumentos Históricos",
@@ -297,7 +295,6 @@ const getMockRestaurants = (city: string): Restaurant[] => {
       }
     ];
   } else {
-    // Usar algumas coordenadas fictícias para o caso de cidades não específicas
     return [
       {
         name: "Restaurante Premiado",
@@ -349,7 +346,7 @@ const TripDetails = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
-  const cityCoordinates = useRef<{ lat: number; lng: number }>({ lat: 38.7223, lng: -9.1393 }); // Padrão para Lisboa
+  const cityCoordinates = useRef<{ lat: number; lng: number }>({ lat: 38.7223, lng: -9.1393 });
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
@@ -527,6 +524,37 @@ const TripDetails = () => {
     }
   };
 
+  const getDetailedPOI = (poi: PointOfInterest, index: number) => {
+    const openingHours = ["10:00 - 18:00", "09:30 - 19:00", "10:00 - 20:00", "09:00 - 17:00"][index % 4];
+    const ticketPrice = ["€10,00", "€12,50", "€8,00", "Gratuito"][index % 4];
+    const rating = (4 + (index % 10) / 10).toFixed(1);
+    const reviews = 100 + (index * 52) % 900;
+    
+    return {
+      ...poi,
+      openingHours,
+      ticketPrice,
+      rating: parseFloat(rating),
+      reviews,
+      images: [
+        poi.imageUrl,
+        `https://source.unsplash.com/random/800x600/?${poi.type.toLowerCase()},${index + 1}`,
+        `https://source.unsplash.com/random/800x600/?${poi.type.toLowerCase()},${index + 2}`
+      ],
+      videos: [
+        "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        "https://www.youtube.com/embed/jNQXAC9IVRw"
+      ],
+      description: `${poi.name} é um ${poi.type.toLowerCase()} espetacular localizado em uma das regiões mais visitadas. 
+        
+Com uma história rica e impressionante arquitetura, este local oferece uma experiência cultural única para todos os visitantes. Você encontrará coleções fascinantes, exposições temporárias e um ambiente acolhedor.
+
+Fundado há muitas décadas, o ${poi.name} se tornou um símbolo cultural da região, atraindo milhares de turistas anualmente. A equipe é atenciosa e sempre disposta a fornecer informações detalhadas sobre as exposições e a história do local.
+
+Se você está planejando sua visita, recomendamos reservar pelo menos 2-3 horas para aproveitar completamente tudo o que este lugar tem a oferecer. Não deixe de visitar a loja de souvenirs onde você pode encontrar lembranças únicas para levar para casa.`
+    };
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -654,27 +682,41 @@ const TripDetails = () => {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {pointsOfInterest.map((poi, index) => (
-              <div key={index} className="bg-card rounded-lg shadow border border-border overflow-hidden">
-                <div className="h-48 overflow-hidden relative">
-                  <img 
-                    src={poi.imageUrl} 
-                    alt={poi.name} 
-                    className="w-full h-full object-cover transition-transform hover:scale-105"
-                  />
-                  <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
-                    {index + 1}
+            {pointsOfInterest.map((poi, index) => {
+              const detailedPoi = getDetailedPOI(poi, index);
+              
+              return (
+                <Link 
+                  key={index}
+                  to={`/trips/${id}/poi/${index}`}
+                  state={{ poi: detailedPoi }}
+                  className="bg-card rounded-lg shadow border border-border overflow-hidden hover:shadow-lg transition-shadow"
+                >
+                  <div className="h-48 overflow-hidden relative">
+                    <img 
+                      src={poi.imageUrl} 
+                      alt={poi.name} 
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                    />
+                    <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-foreground">{poi.name}</h3>
-                  <p className="text-sm text-muted-foreground">{poi.type}</p>
-                  {poi.address && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{poi.address}</p>
-                  )}
-                </div>
-              </div>
-            ))}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-foreground">{poi.name}</h3>
+                    <p className="text-sm text-muted-foreground">{poi.type}</p>
+                    {poi.address && (
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{poi.address}</p>
+                    )}
+                    <div className="mt-2 flex justify-end">
+                      <div className="text-xs bg-primary/10 rounded-full px-2 py-1 text-primary">
+                        Ver detalhes
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
