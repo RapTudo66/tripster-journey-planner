@@ -1,4 +1,3 @@
-
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
@@ -48,6 +47,12 @@ interface Trip {
   created_at: string;
   country?: string;
   city?: string;
+}
+
+declare global {
+  interface Window {
+    initMap?: () => void;
+  }
 }
 
 const getCityCoordinates = (country: string | undefined, city: string | undefined): { lat: number; lng: number } => {
@@ -144,7 +149,6 @@ const TripDetails = () => {
     }
   }, [trip, dataLoaded]);
 
-  // This function loads attractions data and generates the itinerary
   const loadAttractionsData = (country: string, city: string, days: number) => {
     console.log(`Loading attractions data for ${city}, ${country}`);
     
