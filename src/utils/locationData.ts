@@ -1,7 +1,7 @@
-
 export interface City {
   name: string;
   pointsOfInterest: string[];
+  restaurants?: string[];
 }
 
 export interface Country {
@@ -25,6 +25,14 @@ export const countries: Country[] = [
           "Alfama",
           "Bairro Alto",
         ],
+        restaurants: [
+          "Belcanto",
+          "Time Out Market Lisboa",
+          "Cervejaria Ramiro",
+          "Pastéis de Belém",
+          "A Cevicheria",
+          "O Talho",
+        ]
       },
       {
         name: "Porto",
@@ -37,6 +45,14 @@ export const countries: Country[] = [
           "Caves do Vinho do Porto",
           "Casa da Música",
         ],
+        restaurants: [
+          "Cantina 32",
+          "Casa Guedes",
+          "DOP",
+          "The Yeatman",
+          "Café Santiago",
+          "Café Majestic",
+        ]
       },
       {
         name: "Faro",
@@ -48,6 +64,14 @@ export const countries: Country[] = [
           "Catedral de Faro",
           "Marina de Faro",
         ],
+        restaurants: [
+          "Faz Gostos",
+          "Se7e Pedras",
+          "Estaminé",
+          "O Paquete",
+          "Tertúlia Algarvia",
+          "A Tasca do Ricky",
+        ]
       },
     ],
   },

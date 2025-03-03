@@ -19,6 +19,12 @@ export type Trip = {
   name: string;
   num_people: number;
   created_at: string;
+  country?: string; // Adicionando o campo country como opcional
+  city?: string; // Adicionando o campo city como opcional
+  title?: string; // Adicionando suporte para o campo title usado em algumas partes
+  description?: string; // Adicionando suporte para o campo description
+  start_date?: string; // Adicionando suporte para o campo de data inicial
+  end_date?: string; // Adicionando suporte para o campo de data final
 };
 
 export type Expense = {

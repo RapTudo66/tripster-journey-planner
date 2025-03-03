@@ -77,6 +77,8 @@ export type Database = {
       trips: {
         Row: {
           budget: number | null
+          city: string | null
+          country: string | null
           created_at: string
           description: string | null
           end_date: string | null
@@ -88,6 +90,8 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -99,6 +103,8 @@ export type Database = {
         }
         Update: {
           budget?: number | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
