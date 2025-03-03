@@ -1,4 +1,3 @@
-
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
@@ -102,7 +101,6 @@ const loadGoogleMapsScript = (callback: () => void) => {
   script.onload = callback;
 };
 
-// Função auxiliar para formatar datas
 const formatDate = (dateString: string | null) => {
   if (!dateString) return 'Data não definida';
   const date = new Date(dateString);
@@ -114,7 +112,6 @@ const formatDate = (dateString: string | null) => {
   });
 };
 
-// Função para calcular o número de dias entre duas datas
 const calculateDays = (startDate: string | null, endDate: string | null): number => {
   if (!startDate || !endDate) return 0;
   
@@ -125,7 +122,6 @@ const calculateDays = (startDate: string | null, endDate: string | null): number
   return diffDays + 1; // Incluindo o dia inicial e final
 };
 
-// Função para gerar datas para os dias do roteiro
 const generateDatesForItinerary = (startDate: string | null, numDays: number): string[] => {
   if (!startDate) return Array(numDays).fill('');
   
@@ -141,7 +137,6 @@ const generateDatesForItinerary = (startDate: string | null, numDays: number): s
   return dates;
 };
 
-// Função para gerar um roteiro completo baseado nos pontos de interesse e restaurantes
 const generateItinerary = (
   pointsOfInterest: PointOfInterest[], 
   restaurants: Restaurant[], 
@@ -150,34 +145,28 @@ const generateItinerary = (
 ): ItineraryDay[] => {
   const itinerary: ItineraryDay[] = [];
   
-  // Distribuir pontos de interesse ao longo dos dias
   const pois = [...pointsOfInterest];
   const rests = [...restaurants];
   
-  // Embaralhar os arrays para variedade
   pois.sort(() => Math.random() - 0.5);
   rests.sort(() => Math.random() - 0.5);
   
-  // Criar um roteiro para cada dia
   for (let i = 0; i < numDays; i++) {
     const morning: PointOfInterest[] = [];
     const afternoon: PointOfInterest[] = [];
     
-    // Adicionar 2 atrações pela manhã
     for (let j = 0; j < 2; j++) {
       if (pois.length > 0) {
         morning.push(pois.shift()!);
       }
     }
     
-    // Adicionar 2 atrações pela tarde
     for (let j = 0; j < 2; j++) {
       if (pois.length > 0) {
         afternoon.push(pois.shift()!);
       }
     }
     
-    // Escolher restaurantes para almoço e jantar
     const lunch = rests.length > 0 ? rests.shift()! : null;
     const dinner = rests.length > 0 ? rests.shift()! : null;
     
@@ -238,6 +227,14 @@ const TripDetails = () => {
   const [numDays, setNumDays] = useState(0);
   const [activeTab, setActiveTab] = useState("roteiro");
 
+  const navigateToPointOfInterest = (poi: PointOfInterest) => {
+    return `/trips/${id}/poi/${poi.name.toLowerCase().replace(/\s+/g, "-")}`;
+  };
+
+  const navigateToRestaurant = (restaurant: Restaurant) => {
+    return `/trips/${id}/restaurant/${restaurant.name.toLowerCase().replace(/\s+/g, "-")}`;
+  };
+
   useEffect(() => {
     if (user && id) {
       loadTrip();
@@ -264,7 +261,6 @@ const TripDetails = () => {
     }
   }, [loading, trip, mapRef.current]);
 
-  // Gerar roteiro quando os dados da viagem e os pontos de interesse estiverem disponíveis
   useEffect(() => {
     if (trip && pointsOfInterest.length > 0 && restaurants.length > 0) {
       const days = calculateDays(trip.start_date, trip.end_date);
@@ -303,11 +299,9 @@ const TripDetails = () => {
     setTrip(data as Trip);
     
     if (data?.country && data?.city) {
-      // Carregar pontos de interesse e restaurantes baseados no país/cidade armazenados
       const pois = getPointsOfInterestForCity(data.country, data.city);
       const rests = getRestaurantsForCity(data.country, data.city);
       
-      // Enriquecer os dados com detalhes adicionais
       const enrichedPOIs = enrichDataWithDetails([...pois]) as PointOfInterest[];
       const enrichedRestaurants = enrichDataWithDetails([...rests]) as Restaurant[];
       
@@ -444,7 +438,6 @@ const TripDetails = () => {
         </div>
         
         <div className="p-4 bg-card">
-          {/* Manhã */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-primary flex items-center gap-2 mb-4">
               <Clock size={20} /> Manhã
@@ -453,9 +446,14 @@ const TripDetails = () => {
             {day.morning.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {day.morning.map((poi, index) => (
-                  <div key={index} className="border border-border rounded-lg overflow-hidden">
+                  <Link 
+                    key={index}
+                    to={navigateToPointOfInterest(poi)}
+                    state={{ poi }}
+                    className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
                     <div className="h-48 overflow-hidden">
-                      <img src={poi.imageUrl} alt={poi.name} className="w-full h-full object-cover" />
+                      <img src={poi.imageUrl} alt={poi.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                     </div>
                     <div className="p-4">
                       <h5 className="font-semibold text-lg">{poi.name}</h5>
@@ -486,7 +484,7 @@ const TripDetails = () => {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
@@ -494,17 +492,20 @@ const TripDetails = () => {
             )}
           </div>
           
-          {/* Almoço */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-accent flex items-center gap-2 mb-4">
               <Utensils size={20} /> Almoço
             </h4>
             
             {day.lunch ? (
-              <div className="border border-border rounded-lg overflow-hidden">
+              <Link 
+                to={navigateToRestaurant(day.lunch)}
+                state={{ poi: { ...day.lunch, type: 'Restaurante' } }}
+                className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              >
                 <div className="md:flex">
                   <div className="md:w-1/3 h-48 md:h-auto overflow-hidden">
-                    <img src={day.lunch.imageUrl} alt={day.lunch.name} className="w-full h-full object-cover" />
+                    <img src={day.lunch.imageUrl} alt={day.lunch.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </div>
                   <div className="p-4 md:w-2/3">
                     <div className="flex justify-between items-start">
@@ -549,13 +550,12 @@ const TripDetails = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ) : (
               <p className="text-muted-foreground italic">Sugestão: explore restaurantes locais.</p>
             )}
           </div>
           
-          {/* Tarde */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-primary flex items-center gap-2 mb-4">
               <Clock size={20} /> Tarde
@@ -564,9 +564,14 @@ const TripDetails = () => {
             {day.afternoon.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {day.afternoon.map((poi, index) => (
-                  <div key={index} className="border border-border rounded-lg overflow-hidden">
+                  <Link 
+                    key={index}
+                    to={navigateToPointOfInterest(poi)}
+                    state={{ poi }}
+                    className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
                     <div className="h-48 overflow-hidden">
-                      <img src={poi.imageUrl} alt={poi.name} className="w-full h-full object-cover" />
+                      <img src={poi.imageUrl} alt={poi.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                     </div>
                     <div className="p-4">
                       <h5 className="font-semibold text-lg">{poi.name}</h5>
@@ -597,7 +602,7 @@ const TripDetails = () => {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
@@ -605,17 +610,20 @@ const TripDetails = () => {
             )}
           </div>
           
-          {/* Jantar */}
           <div>
             <h4 className="text-lg font-semibold text-accent flex items-center gap-2 mb-4">
               <Utensils size={20} /> Jantar
             </h4>
             
             {day.dinner ? (
-              <div className="border border-border rounded-lg overflow-hidden">
+              <Link 
+                to={navigateToRestaurant(day.dinner)}
+                state={{ poi: { ...day.dinner, type: 'Restaurante' } }}
+                className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              >
                 <div className="md:flex">
                   <div className="md:w-1/3 h-48 md:h-auto overflow-hidden">
-                    <img src={day.dinner.imageUrl} alt={day.dinner.name} className="w-full h-full object-cover" />
+                    <img src={day.dinner.imageUrl} alt={day.dinner.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </div>
                   <div className="p-4 md:w-2/3">
                     <div className="flex justify-between items-start">
@@ -660,7 +668,7 @@ const TripDetails = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ) : (
               <p className="text-muted-foreground italic">Sugestão: explore restaurantes locais.</p>
             )}

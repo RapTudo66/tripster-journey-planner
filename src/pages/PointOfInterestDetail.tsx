@@ -3,7 +3,9 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { ArrowLeft, MapPin, Clock, Ticket, Info, Star } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Ticket, Info, Star, Share, Phone } from "lucide-react";
+import { SocialMediaFeed } from "@/components/SocialMediaFeed";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PointOfInterestDetailProps {
   name: string;
@@ -17,6 +19,8 @@ interface PointOfInterestDetailProps {
   reviews?: number;
   images?: string[];
   videos?: string[];
+  phone?: string;
+  website?: string;
 }
 
 const PointOfInterestDetail = () => {
@@ -24,7 +28,7 @@ const PointOfInterestDetail = () => {
   const location = useLocation();
   const [poi, setPoi] = useState<PointOfInterestDetailProps | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'info' | 'photos' | 'videos'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'photos' | 'videos' | 'social'>('info');
 
   useEffect(() => {
     if (location.state?.poi) {
@@ -75,8 +79,10 @@ const PointOfInterestDetail = () => {
   // Mock additional images if none provided
   const allImages = poi.images || [
     poi.imageUrl,
-    "https://source.unsplash.com/random/800x600/?museum",
-    "https://source.unsplash.com/random/800x600/?art"
+    `https://source.unsplash.com/random/800x600/?${poi.type.toLowerCase()}`,
+    `https://source.unsplash.com/random/800x600/?${poi.name.toLowerCase().replace(/\s+/g, "")}`,
+    `https://source.unsplash.com/random/800x600/?tourism,${poi.type.toLowerCase()}`,
+    `https://source.unsplash.com/random/800x600/?landmark,${poi.type.toLowerCase()}`
   ];
 
   // Mock videos if none provided
@@ -162,45 +168,39 @@ const PointOfInterestDetail = () => {
                   </div>
                 </div>
               )}
+
+              {poi.phone && (
+                <div className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-foreground">Telefone</h3>
+                    <p className="text-muted-foreground">{poi.phone}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="mb-6">
-              <div className="flex border-b border-border">
-                <button 
-                  onClick={() => setActiveTab('info')}
-                  className={`px-4 py-2 font-medium text-sm ${activeTab === 'info' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-                >
-                  Informações
-                </button>
-                <button 
-                  onClick={() => setActiveTab('photos')}
-                  className={`px-4 py-2 font-medium text-sm ${activeTab === 'photos' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-                >
-                  Fotos
-                </button>
-                <button 
-                  onClick={() => setActiveTab('videos')}
-                  className={`px-4 py-2 font-medium text-sm ${activeTab === 'videos' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-                >
-                  Vídeos
-                </button>
-              </div>
-            </div>
-
-            {activeTab === 'info' && (
-              <div className="prose max-w-none">
-                <div className="flex items-start gap-3 mb-4">
-                  <Info className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                  <h2 className="text-xl font-bold text-foreground mt-0">Sobre {poi.name}</h2>
+            <Tabs defaultValue="info" className="mb-6" onValueChange={(value) => setActiveTab(value as any)}>
+              <TabsList className="grid grid-cols-4">
+                <TabsTrigger value="info">Informações</TabsTrigger>
+                <TabsTrigger value="photos">Fotos</TabsTrigger>
+                <TabsTrigger value="videos">Vídeos</TabsTrigger>
+                <TabsTrigger value="social">Redes Sociais</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="info" className="mt-6">
+                <div className="prose max-w-none">
+                  <div className="flex items-start gap-3 mb-4">
+                    <Info className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                    <h2 className="text-xl font-bold text-foreground mt-0">Sobre {poi.name}</h2>
+                  </div>
+                  <div className="whitespace-pre-line text-muted-foreground">
+                    {description}
+                  </div>
                 </div>
-                <div className="whitespace-pre-line text-muted-foreground">
-                  {description}
-                </div>
-              </div>
-            )}
+              </TabsContent>
 
-            {activeTab === 'photos' && (
-              <div>
+              <TabsContent value="photos" className="mt-6">
                 <h2 className="text-xl font-bold text-foreground mb-4">Galeria de Fotos</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {allImages.map((img, index) => (
@@ -209,11 +209,9 @@ const PointOfInterestDetail = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              </TabsContent>
 
-            {activeTab === 'videos' && (
-              <div>
+              <TabsContent value="videos" className="mt-6">
                 <h2 className="text-xl font-bold text-foreground mb-4">Vídeos</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {allVideos.map((videoUrl, index) => (
@@ -229,8 +227,19 @@ const PointOfInterestDetail = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              </TabsContent>
+
+              <TabsContent value="social" className="mt-6">
+                <SocialMediaFeed location={poi.address?.split(",").pop()?.trim() || "Lisboa"} poiName={poi.name} />
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-center mt-6">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Share className="h-4 w-4" />
+                Compartilhar
+              </Button>
+            </div>
           </div>
         </div>
 
