@@ -1,3 +1,4 @@
+
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
@@ -784,8 +785,10 @@ const TripDetails = () => {
               <h3 className="text-xl font-semibold mb-4">Pontos de Interesse</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 {pointsOfInterest.map((poi, index) => (
-                  <div 
+                  <Link
                     key={index}
+                    to={navigateToPointOfInterest(poi)}
+                    state={{ poi }}
                     className="bg-card rounded-lg shadow border border-border overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <div className="h-48 overflow-hidden relative">
@@ -805,4 +808,64 @@ const TripDetails = () => {
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{poi.address}</p>
                       )}
                       
-                      <div className="mt-3 flex flex-wrap
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 text-amber-400" />
+                          <span className="text-sm">{poi.rating}</span>
+                        </div>
+                        {poi.openingHours && (
+                          <div className="flex items-center gap-1 ml-3">
+                            <Clock className="h-4 w-4 text-primary" />
+                            <span className="text-xs text-muted-foreground">{poi.openingHours}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              
+              <h3 className="text-xl font-semibold mb-4 mt-10">Restaurantes</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {restaurants.map((restaurant, index) => (
+                  <Link
+                    key={index}
+                    to={navigateToRestaurant(restaurant)}
+                    state={{ poi: { ...restaurant, type: 'Restaurante' } }}
+                    className="bg-card rounded-lg shadow border border-border overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="h-48 overflow-hidden relative">
+                      <img 
+                        src={restaurant.imageUrl} 
+                        alt={restaurant.name} 
+                        className="w-full h-full object-cover transition-transform hover:scale-105"
+                      />
+                      <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-sm font-bold">
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-foreground">{restaurant.name}</h3>
+                      <div className="flex items-center mt-1">
+                        <Star className="h-4 w-4 text-amber-400" />
+                        <span className="text-sm ml-1">{restaurant.rating}</span>
+                        <span className="mx-2 text-muted-foreground">•</span>
+                        <span className="text-sm text-muted-foreground">{restaurant.cuisine}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">{restaurant.priceLevel}</p>
+                      {restaurant.address && (
+                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{restaurant.address}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default TripDetails;
