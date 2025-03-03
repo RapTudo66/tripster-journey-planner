@@ -3,7 +3,17 @@ import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, Trip as TripType } from "@/lib/supabase";
+import { 
+  supabase, 
+  Trip as TripType, 
+  PointOfInterest,
+  Restaurant,
+  ItineraryDay,
+  calculateDays,
+  generateDatesForItinerary,
+  generateItinerary,
+  enrichDataWithDetails
+} from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   Calendar, 
@@ -39,50 +49,6 @@ interface Trip {
   city?: string;
 }
 
-interface PointOfInterest {
-  name: string;
-  type: string;
-  imageUrl: string;
-  address?: string;
-  location?: {
-    lat: number;
-    lng: number;
-  };
-  openingHours?: string;
-  ticketPrice?: string;
-  rating?: number;
-  reviews?: number;
-  description?: string;
-  phone?: string;
-  website?: string;
-}
-
-interface Restaurant {
-  name: string;
-  rating: number;
-  cuisine: string;
-  priceLevel: string;
-  imageUrl: string;
-  address?: string;
-  location?: {
-    lat: number;
-    lng: number;
-  };
-  reviews?: number;
-  openingHours?: string;
-  phone?: string;
-  website?: string;
-}
-
-interface ItineraryDay {
-  day: number;
-  date: string;
-  morning: PointOfInterest[];
-  lunch: Restaurant | null;
-  afternoon: PointOfInterest[];
-  dinner: Restaurant | null;
-}
-
 const getCityCoordinates = (country: string | undefined, city: string | undefined): { lat: number; lng: number } => {
   if (!country || !city) return { lat: 38.7223, lng: -9.1393 }; // Default to Lisbon
 
@@ -112,105 +78,6 @@ const formatDate = (dateString: string | null) => {
   });
 };
 
-const calculateDays = (startDate: string | null, endDate: string | null): number => {
-  if (!startDate || !endDate) return 0;
-  
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays + 1; // Incluindo o dia inicial e final
-};
-
-const generateDatesForItinerary = (startDate: string | null, numDays: number): string[] => {
-  if (!startDate) return Array(numDays).fill('');
-  
-  const dates: string[] = [];
-  const start = new Date(startDate);
-  
-  for (let i = 0; i < numDays; i++) {
-    const date = new Date(start);
-    date.setDate(date.getDate() + i);
-    dates.push(date.toISOString().split('T')[0]);
-  }
-  
-  return dates;
-};
-
-const generateItinerary = (
-  pointsOfInterest: PointOfInterest[], 
-  restaurants: Restaurant[], 
-  numDays: number,
-  dates: string[]
-): ItineraryDay[] => {
-  const itinerary: ItineraryDay[] = [];
-  
-  const pois = [...pointsOfInterest];
-  const rests = [...restaurants];
-  
-  pois.sort(() => Math.random() - 0.5);
-  rests.sort(() => Math.random() - 0.5);
-  
-  for (let i = 0; i < numDays; i++) {
-    const morning: PointOfInterest[] = [];
-    const afternoon: PointOfInterest[] = [];
-    
-    for (let j = 0; j < 2; j++) {
-      if (pois.length > 0) {
-        morning.push(pois.shift()!);
-      }
-    }
-    
-    for (let j = 0; j < 2; j++) {
-      if (pois.length > 0) {
-        afternoon.push(pois.shift()!);
-      }
-    }
-    
-    const lunch = rests.length > 0 ? rests.shift()! : null;
-    const dinner = rests.length > 0 ? rests.shift()! : null;
-    
-    itinerary.push({
-      day: i + 1,
-      date: dates[i],
-      morning,
-      lunch,
-      afternoon,
-      dinner
-    });
-  }
-  
-  return itinerary;
-};
-
-const enrichDataWithDetails = (data: any[]): any[] => {
-  return data.map((item, index) => {
-    const openingHours = ["10:00 - 18:00", "09:30 - 19:00", "10:00 - 20:00", "09:00 - 17:00", "08:30 - 22:00"][index % 5];
-    const ticketPrice = ["€10,00", "€12,50", "€8,00", "Gratuito", "€15,00"][index % 5];
-    const rating = (4 + (index % 10) / 10).toFixed(1);
-    const reviews = 100 + (index * 52) % 900;
-    const phone = ["+351 21 000 0000", "+351 22 000 0000", "+351 215 123 456", "+351 223 456 789"][index % 4];
-    const website = `http://www.${item.name.toLowerCase().replace(/\s+/g, '')}.com`;
-    
-    if (!item.openingHours) item.openingHours = openingHours;
-    if (!item.ticketPrice && "type" in item) item.ticketPrice = ticketPrice;
-    if (!item.rating) item.rating = parseFloat(rating);
-    if (!item.reviews) item.reviews = reviews;
-    if (!item.phone) item.phone = phone;
-    if (!item.website) item.website = website;
-    
-    if ("type" in item && !item.description) {
-      item.description = `${item.name} é um ${item.type.toLowerCase()} espetacular. Com uma história rica e impressionante arquitetura, este local oferece uma experiência cultural única para todos os visitantes. Você encontrará coleções fascinantes, exposições temporárias e um ambiente acolhedor.
-
-Fundado há muitas décadas, o ${item.name} se tornou um símbolo cultural da região, atraindo milhares de turistas anualmente. A equipe é atenciosa e sempre disposta a fornecer informações detalhadas sobre as exposições e a história do local.
-
-Se você está planejando sua visita, recomendamos reservar pelo menos 2-3 horas para aproveitar completamente tudo o que este lugar tem a oferecer.`;
-    }
-    
-    return item;
-  });
-};
-
 const TripDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -226,6 +93,7 @@ const TripDetails = () => {
   const [mapError, setMapError] = useState<string | null>(null);
   const [numDays, setNumDays] = useState(0);
   const [activeTab, setActiveTab] = useState("roteiro");
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const navigateToPointOfInterest = (poi: PointOfInterest) => {
     return `/trips/${id}/poi/${poi.name.toLowerCase().replace(/\s+/g, "-")}`;
@@ -262,54 +130,94 @@ const TripDetails = () => {
   }, [loading, trip, mapRef.current]);
 
   useEffect(() => {
-    if (trip && pointsOfInterest.length > 0 && restaurants.length > 0) {
+    if (trip && trip.start_date && trip.end_date && !dataLoaded) {
+      // Only proceed if we have a trip with dates
       const days = calculateDays(trip.start_date, trip.end_date);
       setNumDays(days);
       
-      if (days > 0) {
-        const dates = generateDatesForItinerary(trip.start_date, days);
-        const newItinerary = generateItinerary(pointsOfInterest, restaurants, days, dates);
-        setItinerary(newItinerary);
+      // Load attractions data if we have a country and city
+      if (trip.country && trip.city) {
+        loadAttractionsData(trip.country, trip.city, days);
+        setDataLoaded(true);
       }
     }
-  }, [trip, pointsOfInterest, restaurants]);
+  }, [trip, dataLoaded]);
+
+  // This function loads attractions data and generates the itinerary
+  const loadAttractionsData = (country: string, city: string, days: number) => {
+    console.log(`Loading attractions data for ${city}, ${country}`);
+    
+    // Get points of interest and restaurants for the selected city
+    const pois = getPointsOfInterestForCity(country, city);
+    const rests = getRestaurantsForCity(country, city);
+    
+    if (pois.length === 0 || rests.length === 0) {
+      console.log("Warning: No points of interest or restaurants found for this city");
+      toast({
+        title: "Aviso",
+        description: "Não encontramos pontos de interesse ou restaurantes suficientes para esta cidade.",
+        variant: "default",
+      });
+    }
+    
+    // Enrich the data with additional details
+    const enrichedPOIs = enrichDataWithDetails([...pois]) as PointOfInterest[];
+    const enrichedRestaurants = enrichDataWithDetails([...rests]) as Restaurant[];
+    
+    console.log(`Found ${enrichedPOIs.length} POIs and ${enrichedRestaurants.length} restaurants`);
+    
+    setPointsOfInterest(enrichedPOIs);
+    setRestaurants(enrichedRestaurants);
+    
+    // If we have dates, generate the itinerary
+    if (days > 0 && trip?.start_date) {
+      console.log(`Generating itinerary for ${days} days`);
+      
+      const dates = generateDatesForItinerary(trip.start_date, days);
+      const newItinerary = generateItinerary(enrichedPOIs, enrichedRestaurants, days, dates);
+      
+      console.log(`Generated itinerary with ${newItinerary.length} days`);
+      setItinerary(newItinerary);
+    }
+  };
 
   const loadTrip = async () => {
     if (!user || !id) return;
 
     setLoading(true);
+    setDataLoaded(false);
     
-    const { data, error } = await supabase
-      .from('trips')
-      .select('*')
-      .eq('id', id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (error) {
-      console.error('Error loading trip:', error);
+      if (error) {
+        console.error('Error loading trip:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os detalhes da viagem",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      console.log('Trip loaded:', data);
+      setTrip(data as Trip);
+      
+      setLoading(false);
+    } catch (err) {
+      console.error("Unexpected error loading trip:", err);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os detalhes da viagem",
+        description: "Um erro inesperado ocorreu ao carregar a viagem",
         variant: "destructive",
       });
       setLoading(false);
-      return;
     }
-
-    setTrip(data as Trip);
-    
-    if (data?.country && data?.city) {
-      const pois = getPointsOfInterestForCity(data.country, data.city);
-      const rests = getRestaurantsForCity(data.country, data.city);
-      
-      const enrichedPOIs = enrichDataWithDetails([...pois]) as PointOfInterest[];
-      const enrichedRestaurants = enrichDataWithDetails([...rests]) as Restaurant[];
-      
-      setPointsOfInterest(enrichedPOIs);
-      setRestaurants(enrichedRestaurants);
-    }
-    
-    setLoading(false);
   };
 
   const initializeMap = () => {
@@ -803,6 +711,23 @@ const TripDetails = () => {
                     <p className="text-muted-foreground">
                       Estamos preparando seu roteiro personalizado. Por favor, tente novamente em alguns instantes.
                     </p>
+                    {!dataLoaded && trip.country && trip.city && trip.start_date && trip.end_date && (
+                      <div className="mt-4">
+                        <Button 
+                          onClick={() => {
+                            const days = calculateDays(trip.start_date, trip.end_date);
+                            loadAttractionsData(trip.country!, trip.city!, days);
+                            setDataLoaded(true);
+                            toast({
+                              title: "Gerando roteiro",
+                              description: "Seu roteiro está sendo gerado. Aguarde um momento.",
+                            });
+                          }}
+                        >
+                          Gerar Roteiro
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -880,75 +805,4 @@ const TripDetails = () => {
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{poi.address}</p>
                       )}
                       
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {poi.openingHours && (
-                          <div className="text-xs bg-primary/10 rounded-full px-2 py-1 text-primary flex items-center gap-1">
-                            <Clock size={12} />
-                            <span>{poi.openingHours}</span>
-                          </div>
-                        )}
-                        
-                        {poi.ticketPrice && (
-                          <div className="text-xs bg-primary/10 rounded-full px-2 py-1 text-primary flex items-center gap-1">
-                            <Ticket size={12} />
-                            <span>{poi.ticketPrice}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <h3 className="text-xl font-semibold mb-4">Restaurantes Recomendados</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {restaurants.map((restaurant, index) => (
-                  <div key={index} className="bg-card rounded-lg shadow border border-border overflow-hidden">
-                    <div className="h-48 overflow-hidden relative">
-                      <img 
-                        src={restaurant.imageUrl} 
-                        alt={restaurant.name} 
-                        className="w-full h-full object-cover transition-transform hover:scale-105"
-                      />
-                      <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-sm font-bold">
-                        {index + 1}
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-foreground">{restaurant.name}</h3>
-                        <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-sm font-medium">
-                          {restaurant.rating}
-                          <Star className="h-3 w-3 fill-current" />
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{restaurant.cuisine}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{restaurant.priceLevel}</p>
-                      {restaurant.address && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{restaurant.address}</p>
-                      )}
-                      {restaurant.reviews && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {restaurant.reviews} avaliações
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
-};
-
-declare global {
-  interface Window {
-    initMap: () => void;
-    google: typeof google;
-  }
-}
-
-export default TripDetails;
+                      <div className="mt-3 flex flex-wrap
