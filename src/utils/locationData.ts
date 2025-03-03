@@ -1,13 +1,46 @@
+
 export interface City {
   name: string;
   pointsOfInterest: string[];
   restaurants?: string[];
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface Country {
   name: string;
   cities: City[];
 }
+
+// Mapeia países para códigos de identificação usados na aplicação
+const countryIds: Record<string, string> = {
+  "Portugal": "pt",
+  "Espanha": "es",
+  "França": "fr",
+  "Itália": "it",
+  "Japão": "jp"
+};
+
+// Mapeia cidades para códigos de identificação usados na aplicação
+const cityIds: Record<string, string> = {
+  "Lisboa": "lisbon",
+  "Porto": "porto",
+  "Faro": "faro",
+  "Madrid": "madrid",
+  "Barcelona": "barcelona",
+  "Sevilha": "seville",
+  "Paris": "paris",
+  "Lyon": "lyon",
+  "Nice": "nice",
+  "Roma": "rome",
+  "Veneza": "venice",
+  "Florença": "florence",
+  "Tóquio": "tokyo",
+  "Quioto": "kyoto",
+  "Osaka": "osaka"
+};
 
 export const countries: Country[] = [
   {
@@ -32,7 +65,8 @@ export const countries: Country[] = [
           "Pastéis de Belém",
           "A Cevicheria",
           "O Talho",
-        ]
+        ],
+        coordinates: { lat: 38.7223, lng: -9.1393 }
       },
       {
         name: "Porto",
@@ -46,13 +80,14 @@ export const countries: Country[] = [
           "Casa da Música",
         ],
         restaurants: [
-          "Cantina 32",
+          "Cantinho 32",
           "Casa Guedes",
           "DOP",
           "The Yeatman",
           "Café Santiago",
           "Café Majestic",
-        ]
+        ],
+        coordinates: { lat: 41.1579, lng: -8.6291 }
       },
       {
         name: "Faro",
@@ -71,7 +106,8 @@ export const countries: Country[] = [
           "O Paquete",
           "Tertúlia Algarvia",
           "A Tasca do Ricky",
-        ]
+        ],
+        coordinates: { lat: 37.0193, lng: -7.9304 }
       },
     ],
   },
@@ -89,6 +125,7 @@ export const countries: Country[] = [
           "Estádio Santiago Bernabéu",
           "Mercado San Miguel",
         ],
+        coordinates: { lat: 40.4168, lng: -3.7038 }
       },
       {
         name: "Barcelona",
@@ -101,6 +138,7 @@ export const countries: Country[] = [
           "Camp Nou",
           "Praia de Barceloneta",
         ],
+        coordinates: { lat: 41.3851, lng: 2.1734 }
       },
       {
         name: "Sevilha",
@@ -112,6 +150,7 @@ export const countries: Country[] = [
           "Bairro de Santa Cruz",
           "Torre del Oro",
         ],
+        coordinates: { lat: 37.3891, lng: -5.9845 }
       },
     ],
   },
@@ -129,6 +168,7 @@ export const countries: Country[] = [
           "Jardim de Luxemburgo",
           "Disneyland Paris",
         ],
+        coordinates: { lat: 48.8566, lng: 2.3522 }
       },
       {
         name: "Lyon",
@@ -140,6 +180,7 @@ export const countries: Country[] = [
           "Museu de Belas Artes",
           "Les Halles de Lyon Paul Bocuse",
         ],
+        coordinates: { lat: 45.7640, lng: 4.8357 }
       },
       {
         name: "Nice",
@@ -151,6 +192,7 @@ export const countries: Country[] = [
           "Place Masséna",
           "Mercado de Cours Saleya",
         ],
+        coordinates: { lat: 43.7102, lng: 7.2620 }
       },
     ],
   },
@@ -168,6 +210,7 @@ export const countries: Country[] = [
           "Villa Borghese",
           "Piazza Navona",
         ],
+        coordinates: { lat: 41.9028, lng: 12.4964 }
       },
       {
         name: "Veneza",
@@ -180,6 +223,7 @@ export const countries: Country[] = [
           "Ilha de Murano",
           "Ponte dos Suspiros",
         ],
+        coordinates: { lat: 45.4408, lng: 12.3155 }
       },
       {
         name: "Florença",
@@ -191,6 +235,7 @@ export const countries: Country[] = [
           "Galeria da Academia",
           "Jardins de Boboli",
         ],
+        coordinates: { lat: 43.7696, lng: 11.2558 }
       },
     ],
   },
@@ -208,6 +253,7 @@ export const countries: Country[] = [
           "Akihabara",
           "Harajuku",
         ],
+        coordinates: { lat: 35.6762, lng: 139.6503 }
       },
       {
         name: "Quioto",
@@ -219,6 +265,7 @@ export const countries: Country[] = [
           "Distrito de Gion",
           "Templo Kiyomizu-dera",
         ],
+        coordinates: { lat: 35.0116, lng: 135.7681 }
       },
       {
         name: "Osaka",
@@ -230,6 +277,7 @@ export const countries: Country[] = [
           "Umeda Sky Building",
           "Shinsekai",
         ],
+        coordinates: { lat: 34.6937, lng: 135.5023 }
       },
     ],
   },
@@ -248,4 +296,271 @@ export const getCityByName = (countryName: string, cityName: string): City | und
 export const getCitiesByCountry = (countryName: string): City[] => {
   const country = getCountryByName(countryName);
   return country ? country.cities : [];
+};
+
+// Dados detalhados sobre pontos de interesse (usado na página TripDetails)
+export const getPointsOfInterestForCity = (countryName: string, cityName: string): any[] => {
+  const city = getCityByName(countryName, cityName);
+  if (!city) return [];
+  
+  const cityId = cityIds[cityName] || cityName.toLowerCase().replace(/\s+/g, '-');
+  
+  switch (cityId) {
+    case "lisbon":
+      return [
+        {
+          name: "Torre de Belém",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Belem_Tower_at_night%2C_Lisbon_%282%29.jpg/1200px-Belem_Tower_at_night%2C_Lisbon_%282%29.jpg",
+          location: { lat: 38.6916, lng: -9.2164 },
+          address: "Av. Brasília, 1400-038 Lisboa"
+        },
+        {
+          name: "Mosteiro dos Jerónimos",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Jeronimos_monatary.jpg/1200px-Jeronimos_monatary.jpg",
+          location: { lat: 38.6979, lng: -9.2068 },
+          address: "Praça do Império, 1400-206 Lisboa"
+        },
+        {
+          name: "Castelo de São Jorge",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Castelo_de_S._Jorge_em_Lisboa_%28129356643%29.jpeg/1200px-Castelo_de_S._Jorge_em_Lisboa_%28129356643%29.jpeg",
+          location: { lat: 38.7139, lng: -9.1337 },
+          address: "R. de Santa Cruz do Castelo, 1100-129 Lisboa"
+        },
+        {
+          name: "Oceanário de Lisboa",
+          type: "Atração",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Oceanario_Lisboa.jpg/1200px-Oceanario_Lisboa.jpg",
+          location: { lat: 38.7633, lng: -9.0950 },
+          address: "Esplanada Dom Carlos I, 1990-005 Lisboa"
+        },
+        {
+          name: "Praça do Comércio",
+          type: "Local Histórico",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Vista_da_Pra%C3%A7a_do_Com%C3%A9rcio_Lisboa.jpg/1200px-Vista_da_Pra%C3%A7a_do_Com%C3%A9rcio_Lisboa.jpg",
+          location: { lat: 38.7075, lng: -9.1364 },
+          address: "Praça do Comércio, 1100-148 Lisboa"
+        }
+      ];
+    case "porto":
+      return [
+        {
+          name: "Ponte Dom Luís I",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Bridge%2C_Porto.jpg/1200px-Bridge%2C_Porto.jpg",
+          location: { lat: 41.1396, lng: -8.6093 },
+          address: "Ponte Luiz I, Porto"
+        },
+        {
+          name: "Livraria Lello",
+          type: "Atração",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Escadaria_vermelha_livraria_Lello.jpg/800px-Escadaria_vermelha_livraria_Lello.jpg",
+          location: { lat: 41.1473, lng: -8.6148 },
+          address: "R. das Carmelitas 144, 4050-161 Porto"
+        },
+        {
+          name: "Ribeira",
+          type: "Bairro",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Ribeira%2C_Porto.jpg/1200px-Ribeira%2C_Porto.jpg",
+          location: { lat: 41.1410, lng: -8.6131 },
+          address: "Ribeira, Porto"
+        },
+        {
+          name: "Caves do Vinho do Porto",
+          type: "Atração",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Porto_wine_cellars_of_Vila_Nova_de_Gaia_%286937654864%29.jpg/1200px-Porto_wine_cellars_of_Vila_Nova_de_Gaia_%286937654864%29.jpg",
+          location: { lat: 41.1387, lng: -8.6119 },
+          address: "Vila Nova de Gaia, Porto"
+        },
+        {
+          name: "Palácio da Bolsa",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Pal%C3%A1cio_da_Bolsa.jpg/1200px-Pal%C3%A1cio_da_Bolsa.jpg",
+          location: { lat: 41.1414, lng: -8.6153 },
+          address: "R. de Ferreira Borges, 4050-253 Porto"
+        }
+      ];
+    case "paris":
+      return [
+        {
+          name: "Torre Eiffel",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Tour_eiffel_at_sunrise_from_the_trocadero.jpg/800px-Tour_eiffel_at_sunrise_from_the_trocadero.jpg",
+          location: { lat: 48.8584, lng: 2.2945 },
+          address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris"
+        },
+        {
+          name: "Museu do Louvre",
+          type: "Museu",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Louvre_Museum_Wikimedia_Commons.jpg/1200px-Louvre_Museum_Wikimedia_Commons.jpg",
+          location: { lat: 48.8606, lng: 2.3376 },
+          address: "Rue de Rivoli, 75001 Paris"
+        },
+        {
+          name: "Notre-Dame",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Cath%C3%A9drale_Notre-Dame_de_Paris%2C_20_March_2014.jpg/1200px-Cath%C3%A9drale_Notre-Dame_de_Paris%2C_20_March_2014.jpg",
+          location: { lat: 48.8530, lng: 2.3499 },
+          address: "6 Parvis Notre-Dame - Pl. Jean-Paul II, 75004 Paris"
+        },
+        {
+          name: "Arco do Triunfo",
+          type: "Monumento",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Arc_de_Triomphe_de_l%27%C3%89toile%2C_Paris_21_October_2010.jpg/1200px-Arc_de_Triomphe_de_l%27%C3%89toile%2C_Paris_21_October_2010.jpg",
+          location: { lat: 48.8738, lng: 2.2950 },
+          address: "Place Charles de Gaulle, 75008 Paris"
+        },
+        {
+          name: "Museu d'Orsay",
+          type: "Museu",
+          imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Musee_d%27Orsay_from_Right_Bank_Summer_2019.jpg/1200px-Musee_d%27Orsay_from_Right_Bank_Summer_2019.jpg",
+          location: { lat: 48.8599, lng: 2.3266 },
+          address: "1 Rue de la Légion d'Honneur, 75007 Paris"
+        }
+      ];
+    // Adicione outros casos para as demais cidades
+
+    default:
+      // Para cidades sem dados específicos, geramos dados genéricos
+      const coordinates = city?.coordinates || { lat: 0, lng: 0 };
+      return city?.pointsOfInterest.map((poi, index) => {
+        const { lat, lng } = coordinates;
+        const offset = 0.01 * (index % 5); // Offset para espalhar no mapa
+        
+        return {
+          name: poi,
+          type: ["Monumento", "Museu", "Atração", "Local Histórico", "Parque"][index % 5],
+          imageUrl: `https://source.unsplash.com/random/800x600/?${poi.toLowerCase().replace(/\s+/g, '-')}`,
+          location: { 
+            lat: lat + (offset * Math.cos(index)), 
+            lng: lng + (offset * Math.sin(index)) 
+          },
+          address: `${poi}, ${cityName}, ${countryName}`
+        };
+      }) || [];
+  }
+};
+
+// Dados detalhados sobre restaurantes (usado na página TripDetails)
+export const getRestaurantsForCity = (countryName: string, cityName: string): any[] => {
+  const city = getCityByName(countryName, cityName);
+  if (!city || !city.restaurants) return [];
+  
+  const cityId = cityIds[cityName] || cityName.toLowerCase().replace(/\s+/g, '-');
+  
+  switch (cityId) {
+    case "lisbon":
+      return [
+        {
+          name: "Belcanto",
+          rating: 4.8,
+          cuisine: "Portuguesa Contemporânea",
+          priceLevel: "€€€€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/17/f5/39/f7/belcanto-is-chef-jose.jpg",
+          location: { lat: 38.7094, lng: -9.1421 },
+          address: "R. Serpa Pinto 10A, 1200-026 Lisboa",
+          reviews: 986
+        },
+        {
+          name: "Time Out Market",
+          rating: 4.6,
+          cuisine: "Várias",
+          priceLevel: "€€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/12/33/2d/d5/time-out-market-lisboa.jpg",
+          location: { lat: 38.7067, lng: -9.1459 },
+          address: "Av. 24 de Julho 49, 1200-479 Lisboa",
+          reviews: 1432
+        },
+        {
+          name: "Cervejaria Ramiro",
+          rating: 4.7,
+          cuisine: "Mariscos",
+          priceLevel: "€€€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/11/01/a8/6c/photo4jpg.jpg",
+          location: { lat: 38.7232, lng: -9.1357 },
+          address: "Av. Almirante Reis 1, 1150-007 Lisboa",
+          reviews: 2187
+        },
+        {
+          name: "Pastéis de Belém",
+          rating: 4.5,
+          cuisine: "Café & Pastelaria",
+          priceLevel: "€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/13/ef/de/b6/img-20180731-130120-largejpg.jpg",
+          location: { lat: 38.6975, lng: -9.2030 },
+          address: "R. de Belém 84-92, 1300-085 Lisboa",
+          reviews: 3214
+        }
+      ];
+    case "porto":
+      return [
+        {
+          name: "Cantinho do Avillez",
+          rating: 4.7,
+          cuisine: "Portuguesa Contemporânea",
+          priceLevel: "€€€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/10/04/25/72/main-dining-room.jpg",
+          location: { lat: 41.1464, lng: -8.6152 },
+          address: "R. de Mouzinho da Silveira 166, 4050-426 Porto",
+          reviews: 876
+        },
+        {
+          name: "Café Santiago",
+          rating: 4.6,
+          cuisine: "Portuguesa",
+          priceLevel: "€€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/18/7a/ce/31/francesinha.jpg",
+          location: { lat: 41.1465, lng: -8.6094 },
+          address: "R. de Passos Manuel 226, 4000-382 Porto",
+          reviews: 1245
+        },
+        {
+          name: "Majestic Café",
+          rating: 4.5,
+          cuisine: "Café",
+          priceLevel: "€€€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/13/17/a9/0d/the-beautiful-majestic.jpg",
+          location: { lat: 41.1471, lng: -8.6071 },
+          address: "R. de Santa Catarina 112, 4000-442 Porto",
+          reviews: 2134
+        },
+        {
+          name: "Casa Guedes",
+          rating: 4.7,
+          cuisine: "Sanduíches",
+          priceLevel: "€",
+          imageUrl: "https://media-cdn.tripadvisor.com/media/photo-s/15/8a/1c/b3/perfeita.jpg",
+          location: { lat: 41.1480, lng: -8.6034 },
+          address: "Praça dos Poveiros 130, 4000-393 Porto",
+          reviews: 1678
+        }
+      ];
+    // Adicione outros casos para as demais cidades
+      
+    default:
+      // Para cidades sem dados específicos, geramos dados genéricos
+      const coordinates = city?.coordinates || { lat: 0, lng: 0 };
+      return city?.restaurants.map((restaurant, index) => {
+        const { lat, lng } = coordinates;
+        const offset = 0.01 * (index % 5); // Offset para espalhar no mapa
+        const cuisines = ["Local", "Internacional", "Contemporânea", "Tradicional", "Fusion"];
+        const prices = ["€", "€€", "€€€", "€€€€"];
+        
+        return {
+          name: restaurant,
+          rating: 4 + (index % 10) / 10,
+          cuisine: `${cuisines[index % cuisines.length]} ${countryName}`,
+          priceLevel: prices[index % prices.length],
+          imageUrl: `https://source.unsplash.com/random/800x600/?restaurant,${restaurant.toLowerCase().replace(/\s+/g, '-')}`,
+          location: { 
+            lat: lat + (offset * Math.cos(index + 10)), 
+            lng: lng + (offset * Math.sin(index + 10)) 
+          },
+          address: `${restaurant}, ${cityName}, ${countryName}`,
+          reviews: 100 + (index * 83) % 900
+        };
+      }) || [];
+  }
 };

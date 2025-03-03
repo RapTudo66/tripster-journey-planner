@@ -67,7 +67,7 @@ export const HeroSection = () => {
           com nossa plataforma intuitiva de planejamento de viagens.
         </p>
         <a
-          href="/trips/new"
+          href="/newtrip"
           className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-200 animate-slide-up shadow-lg"
         >
           Começar a Planejar
