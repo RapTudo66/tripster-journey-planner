@@ -23,8 +23,60 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, MapPin, Globe } from "lucide-react";
+import { CalendarIcon, MapPin, Globe, AlertCircle } from "lucide-react";
 import { City, countries, getCitiesByCountry } from "@/utils/locationData";
+
+// Extended list of countries (now includes more countries from around the world)
+const extendedCountries = [
+  ...countries,
+  { name: "Alemanha", code: "DE" },
+  { name: "Japão", code: "JP" },
+  { name: "China", code: "CN" },
+  { name: "Canadá", code: "CA" },
+  { name: "Austrália", code: "AU" },
+  { name: "Argentina", code: "AR" },
+  { name: "México", code: "MX" },
+  { name: "Suíça", code: "CH" },
+  { name: "Egito", code: "EG" },
+  { name: "Índia", code: "IN" },
+  { name: "Tailândia", code: "TH" },
+  { name: "Coreia do Sul", code: "KR" },
+  { name: "África do Sul", code: "ZA" },
+  { name: "Marrocos", code: "MA" },
+  { name: "Emirados Árabes Unidos", code: "AE" },
+  { name: "Nova Zelândia", code: "NZ" },
+  { name: "Grécia", code: "GR" },
+  { name: "Holanda", code: "NL" },
+  { name: "Suécia", code: "SE" },
+  { name: "Noruega", code: "NO" },
+  { name: "Dinamarca", code: "DK" },
+  { name: "Finlândia", code: "FI" },
+  { name: "Bélgica", code: "BE" },
+  { name: "Áustria", code: "AT" },
+  { name: "Turquia", code: "TR" },
+  { name: "Irlanda", code: "IE" },
+  { name: "Rússia", code: "RU" },
+  { name: "Polônia", code: "PL" },
+  { name: "República Tcheca", code: "CZ" },
+  { name: "Hungria", code: "HU" },
+  { name: "Croácia", code: "HR" },
+  { name: "Peru", code: "PE" },
+  { name: "Chile", code: "CL" },
+  { name: "Colômbia", code: "CO" },
+  { name: "Uruguai", code: "UY" },
+].sort((a, b) => a.name.localeCompare(b.name));
+
+// Function to calculate trip duration in days
+const calculateTripDuration = (startDate: Date | undefined, endDate: Date | undefined): number => {
+  if (!startDate || !endDate) return 0;
+  
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays + 1; // Include both start and end days
+};
 
 const NewTrip = () => {
   const navigate = useNavigate();
@@ -38,6 +90,13 @@ const NewTrip = () => {
   const [numPeople, setNumPeople] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [tripDuration, setTripDuration] = useState<number>(0);
+
+  // Calculate trip duration whenever dates change
+  useEffect(() => {
+    const duration = calculateTripDuration(startDate, endDate);
+    setTripDuration(duration);
+  }, [startDate, endDate]);
 
   useEffect(() => {
     if (selectedCountry) {
@@ -154,69 +213,7 @@ const NewTrip = () => {
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>País</Label>
-                <Select
-                  value={selectedCountry}
-                  onValueChange={handleCountryChange}
-                  required
-                >
-                  <SelectTrigger className="w-full border-input pl-9">
-                    <Globe className="h-4 w-4 text-muted-foreground absolute left-3" />
-                    <SelectValue placeholder="Selecione o país" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((country) => (
-                      <SelectItem key={country.name} value={country.name}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Cidade</Label>
-                <Select
-                  value={selectedCity}
-                  onValueChange={handleCityChange}
-                  disabled={!selectedCountry}
-                  required
-                >
-                  <SelectTrigger className="w-full border-input pl-9">
-                    <MapPin className="h-4 w-4 text-muted-foreground absolute left-3" />
-                    <SelectValue placeholder="Selecione a cidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableCities.map((city) => (
-                      <SelectItem key={city.name} value={city.name}>
-                        {city.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {selectedCity && selectedCountry && (
-              <div className="mt-4 p-4 bg-muted rounded-lg">
-                <h3 className="font-medium text-sm text-foreground mb-2">
-                  Pontos de interesse em {selectedCity}:
-                </h3>
-                <ul className="space-y-1">
-                  {availableCities
-                    .find(city => city.name === selectedCity)
-                    ?.pointsOfInterest.map((poi, index) => (
-                      <li key={index} className="text-sm text-muted-foreground flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
-                        {poi}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
-
+            {/* Moved date selection before country/city selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Data de Início</Label>
@@ -274,6 +271,90 @@ const NewTrip = () => {
               </div>
             </div>
 
+            {/* Display trip duration information */}
+            {tripDuration > 0 && (
+              <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5 text-primary" />
+                  <p className="text-sm font-medium text-primary">
+                    Duração da viagem: {tripDuration} {tripDuration === 1 ? 'dia' : 'dias'}
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 pl-7">
+                  {tripDuration < 3 ? (
+                    "Viagem curta: serão sugeridos apenas os principais pontos turísticos."
+                  ) : tripDuration < 7 ? (
+                    "Viagem média: bom equilíbrio entre atrações e tempo livre."
+                  ) : (
+                    "Viagem longa: roteiro detalhado com diversas atrações e experiências locais."
+                  )}
+                </p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>País</Label>
+                <Select
+                  value={selectedCountry}
+                  onValueChange={handleCountryChange}
+                  required
+                >
+                  <SelectTrigger className="w-full border-input pl-9">
+                    <Globe className="h-4 w-4 text-muted-foreground absolute left-3" />
+                    <SelectValue placeholder="Selecione o país" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {extendedCountries.map((country) => (
+                      <SelectItem key={country.name} value={country.name}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Cidade</Label>
+                <Select
+                  value={selectedCity}
+                  onValueChange={handleCityChange}
+                  disabled={!selectedCountry}
+                  required
+                >
+                  <SelectTrigger className="w-full border-input pl-9">
+                    <MapPin className="h-4 w-4 text-muted-foreground absolute left-3" />
+                    <SelectValue placeholder="Selecione a cidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCities.map((city) => (
+                      <SelectItem key={city.name} value={city.name}>
+                        {city.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {selectedCity && selectedCountry && (
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <h3 className="font-medium text-sm text-foreground mb-2">
+                  Pontos de interesse em {selectedCity}:
+                </h3>
+                <ul className="space-y-1">
+                  {availableCities
+                    .find(city => city.name === selectedCity)
+                    ?.pointsOfInterest.map((poi, index) => (
+                      <li key={index} className="text-sm text-muted-foreground flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+                        {poi}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="numPeople">Número de Pessoas</Label>
               <Select value={numPeople} onValueChange={setNumPeople} required>
@@ -289,6 +370,15 @@ const NewTrip = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            {(!startDate || !endDate) && (
+              <div className="flex items-center gap-2 p-3 bg-amber-50 rounded border border-amber-200 text-amber-800">
+                <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                <p className="text-sm">
+                  Recomendamos definir as datas da viagem para gerar um roteiro adequado.
+                </p>
+              </div>
+            )}
 
             <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">
               Criar Viagem

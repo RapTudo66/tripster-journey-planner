@@ -5,19 +5,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, UserCheck, Map, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Navigation = () => {
   const { user, signOut } = useAuth();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Define TypeScript type para as classes da janela
-  declare global {
-    interface Window {
-      initMap?: () => void;
-    }
-  }
 
   // Fecha o menu ao navegar para outra rota
   useEffect(() => {
