@@ -3,8 +3,18 @@ import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { ItineraryDay } from "@/lib/supabase";
 import { formatDate } from "@/utils/dateUtils";
-import { Trip } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
+
+interface Trip {
+  id: string;
+  title: string;
+  description?: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  num_people: number;
+  country?: string;
+  city?: string;
+}
 
 interface ItineraryPdfExportProps {
   trip: Trip;
