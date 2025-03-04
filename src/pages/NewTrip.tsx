@@ -1,4 +1,3 @@
-
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,49 +23,8 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, MapPin, Globe, AlertCircle } from "lucide-react";
-import { City, countries, getCitiesByCountry } from "@/utils/locationData";
+import { City, extendedCountries, getCitiesByCountry } from "@/utils/locationData";
 
-// Extended list of countries (now includes more countries from around the world)
-const extendedCountries = [
-  ...countries,
-  { name: "Alemanha", code: "DE" },
-  { name: "Japão", code: "JP" },
-  { name: "China", code: "CN" },
-  { name: "Canadá", code: "CA" },
-  { name: "Austrália", code: "AU" },
-  { name: "Argentina", code: "AR" },
-  { name: "México", code: "MX" },
-  { name: "Suíça", code: "CH" },
-  { name: "Egito", code: "EG" },
-  { name: "Índia", code: "IN" },
-  { name: "Tailândia", code: "TH" },
-  { name: "Coreia do Sul", code: "KR" },
-  { name: "África do Sul", code: "ZA" },
-  { name: "Marrocos", code: "MA" },
-  { name: "Emirados Árabes Unidos", code: "AE" },
-  { name: "Nova Zelândia", code: "NZ" },
-  { name: "Grécia", code: "GR" },
-  { name: "Holanda", code: "NL" },
-  { name: "Suécia", code: "SE" },
-  { name: "Noruega", code: "NO" },
-  { name: "Dinamarca", code: "DK" },
-  { name: "Finlândia", code: "FI" },
-  { name: "Bélgica", code: "BE" },
-  { name: "Áustria", code: "AT" },
-  { name: "Turquia", code: "TR" },
-  { name: "Irlanda", code: "IE" },
-  { name: "Rússia", code: "RU" },
-  { name: "Polônia", code: "PL" },
-  { name: "República Tcheca", code: "CZ" },
-  { name: "Hungria", code: "HU" },
-  { name: "Croácia", code: "HR" },
-  { name: "Peru", code: "PE" },
-  { name: "Chile", code: "CL" },
-  { name: "Colômbia", code: "CO" },
-  { name: "Uruguai", code: "UY" },
-].sort((a, b) => a.name.localeCompare(b.name));
-
-// Function to calculate trip duration in days
 const calculateTripDuration = (startDate: Date | undefined, endDate: Date | undefined): number => {
   if (!startDate || !endDate) return 0;
   
@@ -92,7 +50,6 @@ const NewTrip = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [tripDuration, setTripDuration] = useState<number>(0);
 
-  // Calculate trip duration whenever dates change
   useEffect(() => {
     const duration = calculateTripDuration(startDate, endDate);
     setTripDuration(duration);
@@ -101,7 +58,6 @@ const NewTrip = () => {
   useEffect(() => {
     if (selectedCountry) {
       setAvailableCities(getCitiesByCountry(selectedCountry));
-      // Reset selected city when country changes
       setSelectedCity("");
     } else {
       setAvailableCities([]);
@@ -170,7 +126,6 @@ const NewTrip = () => {
         description: "Sua viagem foi criada com sucesso",
       });
 
-      // Redireciona para a página de detalhes da viagem
       navigate(`/trips/${data.id}`);
     } catch (error) {
       console.error("Erro ao criar viagem:", error);
@@ -213,7 +168,6 @@ const NewTrip = () => {
               />
             </div>
             
-            {/* Moved date selection before country/city selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Data de Início</Label>
@@ -271,7 +225,6 @@ const NewTrip = () => {
               </div>
             </div>
 
-            {/* Display trip duration information */}
             {tripDuration > 0 && (
               <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
                 <div className="flex items-center gap-2">
@@ -305,7 +258,7 @@ const NewTrip = () => {
                     <SelectValue placeholder="Selecione o país" />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
-                    {extendedCountries.map((country) => (
+                    {extendedCountries.sort((a, b) => a.name.localeCompare(b.name)).map((country) => (
                       <SelectItem key={country.name} value={country.name}>
                         {country.name}
                       </SelectItem>

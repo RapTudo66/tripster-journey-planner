@@ -36,6 +36,9 @@ import {
   getPointsOfInterestForCity,
   getRestaurantsForCity 
 } from "@/utils/locationData";
+import { WeatherForecast } from "@/components/WeatherForecast";
+import { ItineraryPdfExport } from "@/components/ItineraryPdfExport";
+import { formatDate } from "@/utils/dateUtils";
 
 interface Trip {
   id: string;
@@ -51,7 +54,7 @@ interface Trip {
 
 declare global {
   interface Window {
-    initMap?: () => void;
+    initMap: () => void;
   }
 }
 
@@ -71,17 +74,6 @@ const loadGoogleMapsScript = (callback: () => void) => {
   script.defer = true;
   document.head.appendChild(script);
   script.onload = callback;
-};
-
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return 'Data não definida';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('pt-BR', { 
-    weekday: 'long', 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
-  });
 };
 
 const TripDetails = () => {
@@ -635,12 +627,20 @@ const TripDetails = () => {
           <Link to="/trips" className="text-primary hover:underline mb-4 inline-block">
             &larr; Voltar para Minhas Viagens
           </Link>
-          <h1 className="text-3xl font-bold text-foreground">{trip.title}</h1>
-          <div className="flex items-center mt-2 text-muted-foreground gap-2">
-            <MapPin className="h-4 w-4" />
-            <span>{trip.city}, {trip.country}</span>
+          <div className="flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">{trip.title}</h1>
+              <div className="flex items-center mt-2 text-muted-foreground gap-2">
+                <MapPin className="h-4 w-4" />
+                <span>{trip.city}, {trip.country}</span>
+              </div>
+              <p className="mt-2 text-muted-foreground">{trip.description}</p>
+            </div>
+            
+            {itinerary.length > 0 && (
+              <ItineraryPdfExport trip={trip} itinerary={itinerary} />
+            )}
           </div>
-          <p className="mt-2 text-muted-foreground">{trip.description}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -689,6 +689,17 @@ const TripDetails = () => {
             </div>
           </div>
         </div>
+
+        {trip.start_date && trip.end_date && trip.city && trip.country && (
+          <div className="mb-8">
+            <WeatherForecast 
+              city={trip.city} 
+              country={trip.country} 
+              startDate={trip.start_date} 
+              endDate={trip.end_date} 
+            />
+          </div>
+        )}
 
         <Tabs defaultValue="roteiro" className="mb-8" onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">

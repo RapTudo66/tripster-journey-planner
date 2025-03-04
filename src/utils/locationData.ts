@@ -1,4 +1,3 @@
-
 export interface City {
   name: string;
   pointsOfInterest: string[];
@@ -11,6 +10,7 @@ export interface City {
 
 export interface Country {
   name: string;
+  code: string;
   cities: City[];
 }
 
@@ -42,9 +42,76 @@ const cityIds: Record<string, string> = {
   "Osaka": "osaka"
 };
 
+// Helper function to generate generic city data
+const generateGenericCities = (countryName: string): City[] => {
+  const capitalCity: City = {
+    name: `Capital de ${countryName}`,
+    pointsOfInterest: [
+      "Centro Histórico",
+      "Museu Nacional",
+      "Praça Principal",
+      "Catedral",
+      "Parque Central",
+      "Mercado Local"
+    ],
+    restaurants: [
+      "Restaurante Tradicional",
+      "Café Central",
+      "Bistrô Local",
+      "Restaurante Gourmet",
+      "Bar Típico"
+    ],
+    coordinates: { lat: 0, lng: 0 } // Placeholder coordinates
+  };
+
+  const secondCity: City = {
+    name: `Cidade Turística de ${countryName}`,
+    pointsOfInterest: [
+      "Praia Principal",
+      "Rua de Compras",
+      "Fortaleza Histórica",
+      "Mirante Panorâmico",
+      "Porto Marítimo",
+      "Zona Turística"
+    ],
+    restaurants: [
+      "Restaurante à Beira-Mar",
+      "Bar Noturno",
+      "Cafeteria Vista Mar",
+      "Pizzaria Popular",
+      "Restaurante de Frutos do Mar"
+    ],
+    coordinates: { lat: 0.1, lng: 0.1 } // Placeholder coordinates
+  };
+
+  const thirdCity: City = {
+    name: `Cidade Cultural de ${countryName}`,
+    pointsOfInterest: [
+      "Teatro Municipal",
+      "Galeria de Arte",
+      "Biblioteca Central",
+      "Museu de História",
+      "Universidade",
+      "Centro Cultural"
+    ],
+    restaurants: [
+      "Café Literário",
+      "Restaurante Vegano",
+      "Bistrô Artístico",
+      "Pub Cultural",
+      "Cafeteria da Universidade"
+    ],
+    coordinates: { lat: 0.2, lng: 0.2 } // Placeholder coordinates
+  };
+
+  return [capitalCity, secondCity, thirdCity];
+};
+
+// Original predefined countries data
 export const countries: Country[] = [
   {
     name: "Portugal",
+    code: "PT",
     cities: [
       {
         name: "Lisboa",
@@ -113,6 +180,7 @@ export const countries: Country[] = [
   },
   {
     name: "Espanha",
+    code: "ES",
     cities: [
       {
         name: "Madrid",
@@ -156,6 +224,7 @@ export const countries: Country[] = [
   },
   {
     name: "França",
+    code: "FR",
     cities: [
       {
         name: "Paris",
@@ -198,6 +267,7 @@ export const countries: Country[] = [
   },
   {
     name: "Itália",
+    code: "IT",
     cities: [
       {
         name: "Roma",
@@ -241,6 +311,7 @@ export const countries: Country[] = [
   },
   {
     name: "Japão",
+    code: "JP",
     cities: [
       {
         name: "Tóquio",
@@ -283,8 +354,58 @@ export const countries: Country[] = [
   },
 ];
 
+// Extended list of countries with automatically generated cities
+export const extendedCountries: Country[] = [
+  ...countries,
+  { name: "Alemanha", code: "DE", cities: generateGenericCities("Alemanha") },
+  { name: "China", code: "CN", cities: generateGenericCities("China") },
+  { name: "Canadá", code: "CA", cities: generateGenericCities("Canadá") },
+  { name: "Austrália", code: "AU", cities: generateGenericCities("Austrália") },
+  { name: "Argentina", code: "AR", cities: generateGenericCities("Argentina") },
+  { name: "México", code: "MX", cities: generateGenericCities("México") },
+  { name: "Suíça", code: "CH", cities: generateGenericCities("Suíça") },
+  { name: "Egito", code: "EG", cities: generateGenericCities("Egito") },
+  { name: "Índia", code: "IN", cities: generateGenericCities("Índia") },
+  { name: "Tailândia", code: "TH", cities: generateGenericCities("Tailândia") },
+  { name: "Coreia do Sul", code: "KR", cities: generateGenericCities("Coreia do Sul") },
+  { name: "África do Sul", code: "ZA", cities: generateGenericCities("África do Sul") },
+  { name: "Marrocos", code: "MA", cities: generateGenericCities("Marrocos") },
+  { name: "Emirados Árabes Unidos", code: "AE", cities: generateGenericCities("Emirados Árabes Unidos") },
+  { name: "Nova Zelândia", code: "NZ", cities: generateGenericCities("Nova Zelândia") },
+  { name: "Grécia", code: "GR", cities: generateGenericCities("Grécia") },
+  { name: "Holanda", code: "NL", cities: generateGenericCities("Holanda") },
+  { name: "Suécia", code: "SE", cities: generateGenericCities("Suécia") },
+  { name: "Noruega", code: "NO", cities: generateGenericCities("Noruega") },
+  { name: "Dinamarca", code: "DK", cities: generateGenericCities("Dinamarca") },
+  { name: "Finlândia", code: "FI", cities: generateGenericCities("Finlândia") },
+  { name: "Bélgica", code: "BE", cities: generateGenericCities("Bélgica") },
+  { name: "Áustria", code: "AT", cities: generateGenericCities("Áustria") },
+  { name: "Turquia", code: "TR", cities: generateGenericCities("Turquia") },
+  { name: "Irlanda", code: "IE", cities: generateGenericCities("Irlanda") },
+  { name: "Rússia", code: "RU", cities: generateGenericCities("Rússia") },
+  { name: "Polônia", code: "PL", cities: generateGenericCities("Polônia") },
+  { name: "República Tcheca", code: "CZ", cities: generateGenericCities("República Tcheca") },
+  { name: "Hungria", code: "HU", cities: generateGenericCities("Hungria") },
+  { name: "Croácia", code: "HR", cities: generateGenericCities("Croácia") },
+  { name: "Peru", code: "PE", cities: generateGenericCities("Peru") },
+  { name: "Chile", code: "CL", cities: generateGenericCities("Chile") },
+  { name: "Colômbia", code: "CO", cities: generateGenericCities("Colômbia") },
+  { name: "Uruguai", code: "UY", cities: generateGenericCities("Uruguai") },
+  { name: "Indonésia", code: "ID", cities: generateGenericCities("Indonésia") },
+  { name: "Malásia", code: "MY", cities: generateGenericCities("Malásia") },
+  { name: "Vietnã", code: "VN", cities: generateGenericCities("Vietnã") },
+  { name: "Singapura", code: "SG", cities: generateGenericCities("Singapura") },
+  { name: "Israel", code: "IL", cities: generateGenericCities("Israel") },
+  { name: "Jordânia", code: "JO", cities: generateGenericCities("Jordânia") },
+];
+
 export const getCountryByName = (countryName: string): Country | undefined => {
-  return countries.find(country => country.name === countryName);
+  // First check in the original countries list
+  const countryFromOriginal = countries.find(country => country.name === countryName);
+  if (countryFromOriginal) return countryFromOriginal;
+  
+  // Then check in the extended countries list
+  return extendedCountries.find(country => country.name === countryName);
 };
 
 export const getCityByName = (countryName: string, cityName: string): City | undefined => {
