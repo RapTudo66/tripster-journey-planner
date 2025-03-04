@@ -14,34 +14,6 @@ export interface Country {
   cities: City[];
 }
 
-// Mapeia países para códigos de identificação usados na aplicação
-const countryIds: Record<string, string> = {
-  "Portugal": "pt",
-  "Espanha": "es",
-  "França": "fr",
-  "Itália": "it",
-  "Japão": "jp"
-};
-
-// Mapeia cidades para códigos de identificação usados na aplicação
-const cityIds: Record<string, string> = {
-  "Lisboa": "lisbon",
-  "Porto": "porto",
-  "Faro": "faro",
-  "Madrid": "madrid",
-  "Barcelona": "barcelona",
-  "Sevilha": "seville",
-  "Paris": "paris",
-  "Lyon": "lyon",
-  "Nice": "nice",
-  "Roma": "rome",
-  "Veneza": "venice",
-  "Florença": "florence",
-  "Tóquio": "tokyo",
-  "Quioto": "kyoto",
-  "Osaka": "osaka"
-};
-
 // Helper function to generate generic city data
 const generateGenericCities = (countryName: string): City[] => {
   const capitalCity: City = {
