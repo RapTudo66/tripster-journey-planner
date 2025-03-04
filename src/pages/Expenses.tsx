@@ -1,4 +1,3 @@
-
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Plus, Wallet, CalendarIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
-import { Expense } from "@/lib/supabase";
+import { supabase, Expense } from "@/lib/supabase";
 import { useSearchParams } from 'react-router-dom';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -141,7 +139,6 @@ const Expenses = () => {
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  // Corrigido: Formatador customizado para o Recharts Tooltip
   const formatTooltipValue = (value: any) => {
     if (typeof value === 'number') {
       return `${value.toFixed(2)} €`;
@@ -149,7 +146,6 @@ const Expenses = () => {
     return `${value} €`;
   };
 
-  // Corrigido: Formatador customizado para o label do Pie chart
   const renderCustomizedLabel = ({ name, value }: { name: string, value: number }) => {
     return `${name}: ${value.toFixed(2)} €`;
   };
@@ -177,7 +173,6 @@ const Expenses = () => {
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Formulário de Adição de Despesas */}
           <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
             <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
               <Wallet className="h-6 w-6 text-primary" />
@@ -259,7 +254,6 @@ const Expenses = () => {
             </form>
           </div>
 
-          {/* Gráfico de Pizza */}
           <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
             <h2 className="text-2xl font-bold text-foreground mb-6">
               Distribuição de Despesas
@@ -292,7 +286,6 @@ const Expenses = () => {
             </div>
           </div>
 
-          {/* Gráfico de Barras */}
           <div className="bg-card p-6 rounded-lg border border-border shadow-sm md:col-span-2">
             <h2 className="text-2xl font-bold text-foreground mb-6">
               Despesas por Categoria
@@ -321,7 +314,6 @@ const Expenses = () => {
             </div>
           </div>
 
-          {/* Lista de Despesas */}
           <div className="bg-card p-6 rounded-lg border border-border shadow-sm md:col-span-2">
             <h2 className="text-2xl font-bold text-foreground mb-6">
               Histórico de Despesas
