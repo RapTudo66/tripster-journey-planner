@@ -1,3 +1,4 @@
+
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
@@ -242,7 +243,7 @@ const TripDetails = () => {
       type: types[i % types.length],
       imageUrl: `https://source.unsplash.com/featured/?${city.toLowerCase()},${types[i % types.length].toLowerCase()}`,
       description: `Um lugar incrível para visitar em ${city}, ${country}.`,
-      rating: (4 + Math.random()).toFixed(1),
+      rating: Number((4 + Math.random()).toFixed(1)),
       location: {
         lat: 40.416775 + (Math.random() - 0.5) * 0.05,
         lng: -3.703790 + (Math.random() - 0.5) * 0.05
@@ -255,7 +256,7 @@ const TripDetails = () => {
     const priceLevels = ["€", "€€", "€€€", "€€€€"];
     return Array.from({ length: count }, (_, i) => ({
       name: `Restaurante ${city} ${i + 1}`,
-      rating: (4 + Math.random()).toFixed(1),
+      rating: Number((4 + Math.random()).toFixed(1)),
       cuisine: `${cuisines[i % cuisines.length]} ${country}`,
       priceLevel: priceLevels[i % priceLevels.length],
       imageUrl: `https://source.unsplash.com/featured/?restaurant,${city.toLowerCase()}`,

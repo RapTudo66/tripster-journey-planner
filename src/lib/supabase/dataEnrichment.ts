@@ -13,7 +13,7 @@ export const enrichDataWithDetails = (items: PointOfInterest[] | Restaurant[]): 
     
     // Add ratings for POIs if not present
     if ('type' in item && !item.rating) {
-      item.rating = (4 + Math.random()).toFixed(1);
+      item.rating = Number((4 + Math.random()).toFixed(1));
     }
     
     // Add reviews count if not present
