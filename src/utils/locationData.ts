@@ -79,6 +79,21 @@ const generateGenericCities = (countryName: string): City[] => {
   return [capitalCity, secondCity, thirdCity];
 };
 
+// Add the cityIds mapping
+const cityIds: Record<string, string> = {
+  "Lisboa": "lisbon",
+  "Porto": "porto",
+  "Madrid": "madrid",
+  "Barcelona": "barcelona",
+  "Paris": "paris",
+  "Roma": "rome",
+  "Veneza": "venice",
+  "Florença": "florence",
+  "Tóquio": "tokyo",
+  "Quioto": "kyoto",
+  "Osaka": "osaka"
+};
+
 // Original predefined countries data
 export const countries: Country[] = [
   {

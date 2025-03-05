@@ -167,11 +167,11 @@ const TripDetails = () => {
     setRestaurants(enrichedRestaurants);
     
     // If we have dates, generate the itinerary
-    if (days > 0 && trip?.start_date) {
+    if (days > 0 && trip?.start_date && trip?.end_date) {
       console.log(`Generating itinerary for ${days} days`);
       
-      const dates = generateDatesForItinerary(trip.start_date, days);
-      const newItinerary = generateItinerary(enrichedPOIs, enrichedRestaurants, days, dates);
+      // Fix: Use the correct function call with proper arguments
+      const newItinerary = generateItinerary(trip.start_date, trip.end_date, enrichedPOIs, enrichedRestaurants);
       
       console.log(`Generated itinerary with ${newItinerary.length} days`);
       setItinerary(newItinerary);
