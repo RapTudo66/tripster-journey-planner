@@ -12,7 +12,9 @@ import {
   calculateDays,
   generateDatesForItinerary,
   generateItinerary,
-  enrichDataWithDetails
+  enrichDataWithDetails,
+  madridPOIs,
+  madridRestaurants
 } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -92,6 +94,7 @@ const TripDetails = () => {
   const [numDays, setNumDays] = useState(0);
   const [activeTab, setActiveTab] = useState("roteiro");
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const navigateToPointOfInterest = (poi: PointOfInterest) => {
     return `/trips/${id}/poi/${poi.name.toLowerCase().replace(/\s+/g, "-")}`;
@@ -136,46 +139,132 @@ const TripDetails = () => {
       // Load attractions data if we have a country and city
       if (trip.country && trip.city) {
         loadAttractionsData(trip.country, trip.city, days);
-        setDataLoaded(true);
       }
     }
   }, [trip, dataLoaded]);
 
   const loadAttractionsData = (country: string, city: string, days: number) => {
     console.log(`Loading attractions data for ${city}, ${country}`);
+    setError(null);
     
-    // Get points of interest and restaurants for the selected city
-    const pois = getPointsOfInterestForCity(country, city);
-    const rests = getRestaurantsForCity(country, city);
-    
-    if (pois.length === 0 || rests.length === 0) {
-      console.log("Warning: No points of interest or restaurants found for this city");
+    try {
+      // Special case for Madrid which has detailed data
+      if (city === "Madrid" && country === "Espanha") {
+        console.log(`Using detailed Madrid data with ${madridPOIs.length} POIs and ${madridRestaurants.length} restaurants`);
+        
+        const enrichedPOIs = enrichDataWithDetails([...madridPOIs]) as PointOfInterest[];
+        const enrichedRestaurants = enrichDataWithDetails([...madridRestaurants]) as Restaurant[];
+        
+        setPointsOfInterest(enrichedPOIs);
+        setRestaurants(enrichedRestaurants);
+        
+        // If we have dates, generate the itinerary
+        if (days > 0 && trip?.start_date && trip?.end_date) {
+          console.log(`Generating itinerary for ${days} days`);
+          
+          const newItinerary = generateItinerary(
+            trip.start_date, 
+            trip.end_date, 
+            enrichedPOIs, 
+            enrichedRestaurants
+          );
+          
+          console.log(`Generated itinerary with ${newItinerary.length} days`);
+          setItinerary(newItinerary);
+        }
+        
+        setDataLoaded(true);
+        return;
+      }
+      
+      // Use locationData API for other cities
+      const pois = getPointsOfInterestForCity(country, city);
+      const rests = getRestaurantsForCity(country, city);
+      
+      // Ensure we have some data
+      let finalPOIs = pois;
+      let finalRestaurants = rests;
+      
+      if (pois.length === 0 || rests.length === 0) {
+        console.log("Warning: No points of interest or restaurants found for this city");
+        
+        // Generate fallback data
+        finalPOIs = generateFallbackPOIs(city, country, Math.max(5, days * 2));
+        finalRestaurants = generateFallbackRestaurants(city, country, Math.max(4, days * 2));
+        
+        toast({
+          title: "Informação",
+          description: "Estamos usando dados básicos para esta cidade. Os detalhes podem ser limitados.",
+          variant: "default",
+        });
+      }
+      
+      // Enrich the data with additional details
+      const enrichedPOIs = enrichDataWithDetails([...finalPOIs]) as PointOfInterest[];
+      const enrichedRestaurants = enrichDataWithDetails([...finalRestaurants]) as Restaurant[];
+      
+      console.log(`Found ${enrichedPOIs.length} POIs and ${enrichedRestaurants.length} restaurants`);
+      
+      setPointsOfInterest(enrichedPOIs);
+      setRestaurants(enrichedRestaurants);
+      
+      // If we have dates, generate the itinerary
+      if (days > 0 && trip?.start_date && trip?.end_date) {
+        console.log(`Generating itinerary for ${days} days`);
+        
+        const newItinerary = generateItinerary(
+          trip.start_date, 
+          trip.end_date, 
+          enrichedPOIs, 
+          enrichedRestaurants
+        );
+        
+        console.log(`Generated itinerary with ${newItinerary.length} days`);
+        setItinerary(newItinerary);
+      }
+      
+      setDataLoaded(true);
+    } catch (err) {
+      console.error("Error loading attractions data:", err);
+      setError("Ocorreu um erro ao carregar os dados das atrações. Por favor, tente novamente.");
       toast({
-        title: "Aviso",
-        description: "Não encontramos pontos de interesse ou restaurantes suficientes para esta cidade.",
-        variant: "default",
+        title: "Erro",
+        description: "Não foi possível carregar os dados das atrações. Por favor, tente novamente.",
+        variant: "destructive",
       });
     }
-    
-    // Enrich the data with additional details
-    const enrichedPOIs = enrichDataWithDetails([...pois]) as PointOfInterest[];
-    const enrichedRestaurants = enrichDataWithDetails([...rests]) as Restaurant[];
-    
-    console.log(`Found ${enrichedPOIs.length} POIs and ${enrichedRestaurants.length} restaurants`);
-    
-    setPointsOfInterest(enrichedPOIs);
-    setRestaurants(enrichedRestaurants);
-    
-    // If we have dates, generate the itinerary
-    if (days > 0 && trip?.start_date && trip?.end_date) {
-      console.log(`Generating itinerary for ${days} days`);
-      
-      // Fix: Use the correct function call with proper arguments
-      const newItinerary = generateItinerary(trip.start_date, trip.end_date, enrichedPOIs, enrichedRestaurants);
-      
-      console.log(`Generated itinerary with ${newItinerary.length} days`);
-      setItinerary(newItinerary);
-    }
+  };
+
+  const generateFallbackPOIs = (city: string, country: string, count: number): PointOfInterest[] => {
+    const types = ["Ponto Turístico", "Museu", "Parque", "Monumento", "Mercado", "Praça", "Catedral", "Castelo"];
+    return Array.from({ length: count }, (_, i) => ({
+      name: `${types[i % types.length]} de ${city} ${i + 1}`,
+      type: types[i % types.length],
+      imageUrl: `https://source.unsplash.com/featured/?${city.toLowerCase()},${types[i % types.length].toLowerCase()}`,
+      description: `Um lugar incrível para visitar em ${city}, ${country}.`,
+      rating: (4 + Math.random()).toFixed(1),
+      location: {
+        lat: 40.416775 + (Math.random() - 0.5) * 0.05,
+        lng: -3.703790 + (Math.random() - 0.5) * 0.05
+      }
+    }));
+  };
+
+  const generateFallbackRestaurants = (city: string, country: string, count: number): Restaurant[] => {
+    const cuisines = ["Tradicional", "Contemporânea", "Fusion", "Internacional", "Local", "Mediterrânea", "Gourmet"];
+    const priceLevels = ["€", "€€", "€€€", "€€€€"];
+    return Array.from({ length: count }, (_, i) => ({
+      name: `Restaurante ${city} ${i + 1}`,
+      rating: (4 + Math.random()).toFixed(1),
+      cuisine: `${cuisines[i % cuisines.length]} ${country}`,
+      priceLevel: priceLevels[i % priceLevels.length],
+      imageUrl: `https://source.unsplash.com/featured/?restaurant,${city.toLowerCase()}`,
+      reviews: Math.floor(Math.random() * 500) + 100,
+      location: {
+        lat: 40.416775 + (Math.random() - 0.5) * 0.05,
+        lng: -3.703790 + (Math.random() - 0.5) * 0.05
+      }
+    }));
   };
 
   const loadTrip = async () => {
@@ -183,6 +272,7 @@ const TripDetails = () => {
 
     setLoading(true);
     setDataLoaded(false);
+    setError(null);
     
     try {
       const { data, error } = await supabase
@@ -193,6 +283,7 @@ const TripDetails = () => {
 
       if (error) {
         console.error('Error loading trip:', error);
+        setError("Não foi possível carregar os detalhes da viagem");
         toast({
           title: "Erro",
           description: "Não foi possível carregar os detalhes da viagem",
@@ -208,6 +299,7 @@ const TripDetails = () => {
       setLoading(false);
     } catch (err) {
       console.error("Unexpected error loading trip:", err);
+      setError("Um erro inesperado ocorreu ao carregar a viagem");
       toast({
         title: "Erro",
         description: "Um erro inesperado ocorreu ao carregar a viagem",
@@ -590,6 +682,32 @@ const TripDetails = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <p className="text-muted-foreground">Carregando detalhes da viagem...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground">
+              Erro ao carregar a viagem
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {error}
+            </p>
+            <div className="mt-8 flex justify-center gap-4">
+              <Button onClick={() => loadTrip()}>
+                Tentar novamente
+              </Button>
+              <Link to="/trips">
+                <Button variant="outline">Voltar para Minhas Viagens</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
