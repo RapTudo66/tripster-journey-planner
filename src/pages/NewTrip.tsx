@@ -18,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon, AlertCircle } from "lucide-react";
 import { City, getCitiesByCountry } from "@/utils/locationData";
 import { LocationSelector } from "@/components/LocationSelector";
+import { LocationSelectorApi } from "@/components/LocationSelectorApi";
 import {
   Select,
   SelectContent,
@@ -50,20 +51,16 @@ const NewTrip = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [tripDuration, setTripDuration] = useState<number>(0);
+  const [useApiData, setUseApiData] = useState<boolean>(true);
 
   useEffect(() => {
-    const duration = calculateTripDuration(startDate, endDate);
-    setTripDuration(duration);
-  }, [startDate, endDate]);
-
-  useEffect(() => {
-    if (selectedCountry) {
+    if (selectedCountry && !useApiData) {
       setAvailableCities(getCitiesByCountry(selectedCountry));
       setSelectedCity("");
     } else {
       setAvailableCities([]);
     }
-  }, [selectedCountry]);
+  }, [selectedCountry, useApiData]);
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country);
@@ -246,14 +243,45 @@ const NewTrip = () => {
               </div>
             )}
 
-            <LocationSelector
-              selectedCountry={selectedCountry}
-              selectedCity={selectedCity}
-              onCountryChange={handleCountryChange}
-              onCityChange={handleCityChange}
-            />
+            <div className="flex items-center justify-between mb-2 p-2 bg-muted rounded">
+              <span className="text-sm font-medium">Origem dos dados de localização:</span>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  type="button" 
+                  variant={useApiData ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUseApiData(true)}
+                >
+                  API Externa
+                </Button>
+                <Button 
+                  type="button" 
+                  variant={!useApiData ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUseApiData(false)}
+                >
+                  Dados Locais
+                </Button>
+              </div>
+            </div>
 
-            {selectedCity && selectedCountry && (
+            {useApiData ? (
+              <LocationSelectorApi
+                selectedCountry={selectedCountry}
+                selectedCity={selectedCity}
+                onCountryChange={handleCountryChange}
+                onCityChange={handleCityChange}
+              />
+            ) : (
+              <LocationSelector
+                selectedCountry={selectedCountry}
+                selectedCity={selectedCity}
+                onCountryChange={handleCountryChange}
+                onCityChange={handleCityChange}
+              />
+            )}
+
+            {selectedCity && selectedCountry && !useApiData && (
               <div className="mt-4 p-4 bg-muted rounded-lg">
                 <h3 className="font-medium text-sm text-foreground mb-2">
                   Pontos de interesse em {selectedCity}:
