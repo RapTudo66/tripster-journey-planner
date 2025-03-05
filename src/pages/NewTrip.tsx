@@ -18,6 +18,13 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon, AlertCircle } from "lucide-react";
 import { City, getCitiesByCountry } from "@/utils/locationData";
 import { LocationSelector } from "@/components/LocationSelector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 const calculateTripDuration = (startDate: Date | undefined, endDate: Date | undefined): number => {
   if (!startDate || !endDate) return 0;
