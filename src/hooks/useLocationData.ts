@@ -36,7 +36,7 @@ export const useLocationData = () => {
         setErrorMessage('Erro ao carregar países.');
         toast({
           title: 'Erro',
-          description: 'Falha ao carregar dados de países.',
+          description: 'Falha ao carregar dados de países. Usando dados locais.',
           variant: 'destructive',
         });
       } finally {
@@ -71,7 +71,7 @@ export const useLocationData = () => {
         setErrorMessage('Erro ao carregar cidades.');
         toast({
           title: 'Erro',
-          description: 'Falha ao carregar dados de cidades.',
+          description: 'Falha ao carregar dados de cidades. Usando dados locais.',
           variant: 'destructive',
         });
       } finally {
