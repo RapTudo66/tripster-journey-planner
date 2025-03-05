@@ -138,8 +138,8 @@ const getFallbackCities = (countryCode: string): CityData[] => {
     name: city.name,
     country: countryName,
     countryCode: countryCode,
-    latitude: city.latitude || 0,
-    longitude: city.longitude || 0,
+    latitude: city.coordinates ? city.coordinates.lat : 0,
+    longitude: city.coordinates ? city.coordinates.lng : 0,
   }));
 };
 
