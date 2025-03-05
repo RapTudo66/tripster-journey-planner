@@ -2,13 +2,6 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,8 +15,9 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, MapPin, Globe, AlertCircle } from "lucide-react";
-import { City, extendedCountries, getCitiesByCountry } from "@/utils/locationData";
+import { CalendarIcon, AlertCircle } from "lucide-react";
+import { City, getCitiesByCountry } from "@/utils/locationData";
+import { LocationSelector } from "@/components/LocationSelector";
 
 const calculateTripDuration = (startDate: Date | undefined, endDate: Date | undefined): number => {
   if (!startDate || !endDate) return 0;
@@ -245,50 +239,12 @@ const NewTrip = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>País</Label>
-                <Select
-                  value={selectedCountry}
-                  onValueChange={handleCountryChange}
-                  required
-                >
-                  <SelectTrigger className="w-full border-input pl-9">
-                    <Globe className="h-4 w-4 text-muted-foreground absolute left-3" />
-                    <SelectValue placeholder="Selecione o país" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {extendedCountries.sort((a, b) => a.name.localeCompare(b.name)).map((country) => (
-                      <SelectItem key={country.name} value={country.name}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Cidade</Label>
-                <Select
-                  value={selectedCity}
-                  onValueChange={handleCityChange}
-                  disabled={!selectedCountry}
-                  required
-                >
-                  <SelectTrigger className="w-full border-input pl-9">
-                    <MapPin className="h-4 w-4 text-muted-foreground absolute left-3" />
-                    <SelectValue placeholder="Selecione a cidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableCities.map((city) => (
-                      <SelectItem key={city.name} value={city.name}>
-                        {city.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <LocationSelector
+              selectedCountry={selectedCountry}
+              selectedCity={selectedCity}
+              onCountryChange={handleCountryChange}
+              onCityChange={handleCityChange}
+            />
 
             {selectedCity && selectedCountry && (
               <div className="mt-4 p-4 bg-muted rounded-lg">

@@ -8,7 +8,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { City, countries, getCitiesByCountry } from "@/utils/locationData";
+import { City, extendedCountries, getCitiesByCountry } from "@/utils/locationData";
 import { Globe, MapPin } from "lucide-react";
 
 interface LocationSelectorProps {
@@ -49,8 +49,8 @@ export const LocationSelector = ({
             <Globe className="h-4 w-4 text-muted-foreground absolute left-3" />
             <SelectValue placeholder="Selecione o país" />
           </SelectTrigger>
-          <SelectContent>
-            {countries.map((country) => (
+          <SelectContent className="max-h-[300px]">
+            {extendedCountries.sort((a, b) => a.name.localeCompare(b.name)).map((country) => (
               <SelectItem key={country.name} value={country.name}>
                 {country.name}
               </SelectItem>
@@ -70,7 +70,7 @@ export const LocationSelector = ({
             <MapPin className="h-4 w-4 text-muted-foreground absolute left-3" />
             <SelectValue placeholder="Selecione a cidade" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-h-[300px]">
             {availableCities.map((city) => (
               <SelectItem key={city.name} value={city.name}>
                 {city.name}

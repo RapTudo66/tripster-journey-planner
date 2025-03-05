@@ -91,7 +91,30 @@ const cityIds: Record<string, string> = {
   "Florença": "florence",
   "Tóquio": "tokyo",
   "Quioto": "kyoto",
-  "Osaka": "osaka"
+  "Osaka": "osaka",
+  "Braga": "braga",
+  "Coimbra": "coimbra",
+  "Évora": "evora",
+  "Funchal": "funchal",
+  "Ponta Delgada": "ponta-delgada",
+  "Aveiro": "aveiro",
+  "Guimarães": "guimaraes",
+  "València": "valencia",
+  "Sevilha": "seville",
+  "Bilbao": "bilbao",
+  "Granada": "granada",
+  "Lyon": "lyon",
+  "Marselha": "marseille",
+  "Bordeaux": "bordeaux",
+  "Nice": "nice",
+  "Milão": "milan",
+  "Nápoles": "naples",
+  "Turim": "turin",
+  "Palermo": "palermo",
+  "Yokohama": "yokohama",
+  "Sapporo": "sapporo",
+  "Nara": "nara",
+  "Kobe": "kobe"
 };
 
 // Original predefined countries data
@@ -163,6 +186,66 @@ export const countries: Country[] = [
         ],
         coordinates: { lat: 37.0193, lng: -7.9304 }
       },
+      {
+        name: "Braga",
+        pointsOfInterest: [
+          "Santuário do Bom Jesus",
+          "Sé de Braga",
+          "Arco da Porta Nova",
+          "Jardim de Santa Bárbara",
+          "Theatro Circo",
+          "Mosteiro de Tibães",
+        ],
+        coordinates: { lat: 41.5454, lng: -8.4265 }
+      },
+      {
+        name: "Coimbra",
+        pointsOfInterest: [
+          "Universidade de Coimbra",
+          "Biblioteca Joanina",
+          "Sé Velha",
+          "Jardim Botânico",
+          "Mosteiro de Santa Clara-a-Velha",
+          "Portugal dos Pequenitos",
+        ],
+        coordinates: { lat: 40.2033, lng: -8.4103 }
+      },
+      {
+        name: "Évora",
+        pointsOfInterest: [
+          "Templo Romano",
+          "Catedral de Évora",
+          "Capela dos Ossos",
+          "Praça do Giraldo",
+          "Universidade de Évora",
+          "Aqueduto da Água de Prata",
+        ],
+        coordinates: { lat: 38.5742, lng: -7.9075 }
+      },
+      {
+        name: "Funchal",
+        pointsOfInterest: [
+          "Monte Palace",
+          "Jardim Botânico da Madeira",
+          "Teleférico do Funchal",
+          "Mercado dos Lavradores",
+          "Sé do Funchal",
+          "Forte de São Tiago",
+        ],
+        coordinates: { lat: 32.6431, lng: -16.9111 }
+      },
+      {
+        name: "Aveiro",
+        pointsOfInterest: [
+          "Canais de Aveiro",
+          "Praia da Costa Nova",
+          "Museu de Aveiro",
+          "Praça do Peixe",
+          "Campus da Universidade de Aveiro",
+          "Fábrica da Vista Alegre",
+        ],
+        coordinates: { lat: 40.6405, lng: -8.6538 }
+      },
     ],
   },
   {
@@ -207,6 +290,42 @@ export const countries: Country[] = [
         ],
         coordinates: { lat: 37.3891, lng: -5.9845 }
       },
+      {
+        name: "València",
+        pointsOfInterest: [
+          "Cidade das Artes e das Ciências",
+          "Catedral de València",
+          "Mercado Central",
+          "Jardins do Turia",
+          "Praia da Malvarrosa",
+          "Bioparc València",
+        ],
+        coordinates: { lat: 39.4699, lng: -0.3763 }
+      },
+      {
+        name: "Bilbao",
+        pointsOfInterest: [
+          "Museu Guggenheim",
+          "Casco Viejo",
+          "Plaza Nueva",
+          "Catedral de Santiago",
+          "Ponte Zubizuri",
+          "Mercado de La Ribera",
+        ],
+        coordinates: { lat: 43.2630, lng: -2.9350 }
+      },
+      {
+        name: "Granada",
+        pointsOfInterest: [
+          "Alhambra",
+          "Generalife",
+          "Catedral de Granada",
+          "Albaicín",
+          "Sacromonte",
+          "Capilla Real",
+        ],
+        coordinates: { lat: 37.1773, lng: -3.5986 }
+      },
     ],
   },
   {
@@ -249,6 +368,30 @@ export const countries: Country[] = [
           "Mercado de Cours Saleya",
         ],
         coordinates: { lat: 43.7102, lng: 7.2620 }
+      },
+      {
+        name: "Marselha",
+        pointsOfInterest: [
+          "Vieux-Port",
+          "Basílica de Notre-Dame de la Garde",
+          "Calanques",
+          "Château d'If",
+          "Le Panier",
+          "MuCEM",
+        ],
+        coordinates: { lat: 43.2965, lng: 5.3698 }
+      },
+      {
+        name: "Bordeaux",
+        pointsOfInterest: [
+          "Place de la Bourse",
+          "Cité du Vin",
+          "Grand Théâtre",
+          "Catedral de Saint-André",
+          "Pont de Pierre",
+          "Rue Sainte-Catherine",
+        ],
+        coordinates: { lat: 44.8378, lng: -0.5792 }
       },
     ],
   },
@@ -294,6 +437,30 @@ export const countries: Country[] = [
         ],
         coordinates: { lat: 43.7696, lng: 11.2558 }
       },
+      {
+        name: "Milão",
+        pointsOfInterest: [
+          "Duomo di Milano",
+          "Galeria Vittorio Emanuele II",
+          "Teatro alla Scala",
+          "Castelo Sforzesco",
+          "Santa Maria delle Grazie",
+          "Quadrilátero da Moda",
+        ],
+        coordinates: { lat: 45.4642, lng: 9.1900 }
+      },
+      {
+        name: "Nápoles",
+        pointsOfInterest: [
+          "Centro Histórico",
+          "Castel dell'Ovo",
+          "Catacumbas de San Gennaro",
+          "Museu Arqueológico Nacional",
+          "Catedral de Nápoles",
+          "Palácio Real",
+        ],
+        coordinates: { lat: 40.8518, lng: 14.2681 }
+      },
     ],
   },
   {
@@ -336,6 +503,30 @@ export const countries: Country[] = [
           "Shinsekai",
         ],
         coordinates: { lat: 34.6937, lng: 135.5023 }
+      },
+      {
+        name: "Yokohama",
+        pointsOfInterest: [
+          "Minato Mirai 21",
+          "Chinatown de Yokohama",
+          "Jardim Sankeien",
+          "Museu Nippon Maru",
+          "Zoológico Nogeyama",
+          "Cupnoodles Museum",
+        ],
+        coordinates: { lat: 35.4437, lng: 139.6380 }
+      },
+      {
+        name: "Nara",
+        pointsOfInterest: [
+          "Parque de Nara",
+          "Templo Todai-ji",
+          "Kasuga-taisha",
+          "Kofuku-ji",
+          "Isuien Garden",
+          "Naramachi",
+        ],
+        coordinates: { lat: 34.6851, lng: 135.8048 }
       },
     ],
   },
