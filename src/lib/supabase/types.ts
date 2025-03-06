@@ -77,6 +77,7 @@ export interface Restaurant {
   openingHours?: string;
   phone?: string;
   website?: string;
+  description?: string; // Add this missing property
 }
 
 export interface ItineraryDay {
@@ -86,4 +87,5 @@ export interface ItineraryDay {
   lunch: Restaurant | null;
   afternoon: PointOfInterest[];
   dinner: Restaurant | null;
+  theme?: string; // Add this missing property
 }

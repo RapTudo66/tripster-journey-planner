@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { ItineraryDay } from "@/lib/supabase";
@@ -33,9 +32,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
   const [imageCache, setImageCache] = useState<ImageCache>({});
   const [isExporting, setIsExporting] = useState(false);
 
-  // Image mappings for popular attractions
   const attractionImageMap: Record<string, string> = {
-    // Paris attractions
     "Torre Eiffel": "/lovable-uploads/5afdc361-b902-4687-aee5-b875480642aa.png",
     "Museu do Louvre": "https://images.unsplash.com/photo-1565098772267-60af42b81ef2?auto=format&fit=crop&q=80&w=500&h=300",
     "Catedral de Notre-Dame": "https://images.unsplash.com/photo-1584266337025-b45ee5ea0e8f?auto=format&fit=crop&q=80&w=500&h=300",
@@ -53,7 +50,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
     "Montmartre e Basílica de Sacré-Cœur": "https://images.unsplash.com/photo-1555425748-831a8289f2c9?auto=format&fit=crop&q=80&w=500&h=300",
     "Champs-Élysées e Arco do Triunfo": "https://images.unsplash.com/photo-1552308243-d8ceb9ce1ae2?auto=format&fit=crop&q=80&w=500&h=300",
     
-    // Restaurants in Paris
     "Le Café Marly": "https://images.unsplash.com/photo-1560624052-3423b279830c?auto=format&fit=crop&q=80&w=500&h=300",
     "Le Procope": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&q=80&w=500&h=300",
     "Les Deux Magots": "https://images.unsplash.com/photo-1477763816053-7c86d5fa8db1?auto=format&fit=crop&q=80&w=500&h=300",
@@ -61,8 +57,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
     "Le Train Bleu": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=500&h=300",
     "La Mère Catherine": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=500&h=300"
   };
-  
-  // Generic fallback images by category
+
   const fallbackImageMap = {
     attraction: "https://images.unsplash.com/photo-1558452919-08ae4aea8e29?auto=format&fit=crop&q=80&w=500&h=300",
     museum: "https://images.unsplash.com/photo-1503152889424-9c280f38cb1c?auto=format&fit=crop&q=80&w=500&h=300",
@@ -74,7 +69,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
 
   const getCityImage = async (city: string, country: string): Promise<string> => {
     try {
-      // Use the Paris image for Paris trips, otherwise fetch from Unsplash
       if (city.toLowerCase() === "paris") {
         return "/lovable-uploads/4766d627-1aec-4187-b6e3-b353bba4fce0.png";
       }
@@ -95,19 +89,16 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
   };
 
   const getImageForAttraction = async (name: string, category: string = 'attraction'): Promise<string> => {
-    // Check if we already have this image in the cache
     if (imageCache[name]) {
       return imageCache[name];
     }
     
-    // Check if we have a specific image for this attraction
     if (attractionImageMap[name]) {
       const imageUrl = attractionImageMap[name];
       setImageCache(prev => ({ ...prev, [name]: imageUrl }));
       return imageUrl;
     }
     
-    // Use a fallback image based on category
     let fallbackUrl = fallbackImageMap.attraction;
     
     if (name.toLowerCase().includes('museu') || name.toLowerCase().includes('museum')) {
@@ -132,23 +123,18 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
 
   const loadImageAsDataUrl = async (url: string): Promise<string> => {
     try {
-      // Create a new image element
       const img = new Image();
-      img.crossOrigin = "Anonymous"; // Enable CORS
+      img.crossOrigin = "Anonymous";
       
-      // Return a promise that resolves when the image is loaded
       return new Promise((resolve, reject) => {
         img.onload = () => {
-          // Create a canvas to draw the image
           const canvas = document.createElement('canvas');
           canvas.width = img.width;
           canvas.height = img.height;
           
-          // Draw the image on the canvas
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0);
-            // Convert the canvas to a data URL
             const dataUrl = canvas.toDataURL('image/jpeg');
             resolve(dataUrl);
           } else {
@@ -160,12 +146,10 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           reject(new Error(`Failed to load image: ${url}`));
         };
         
-        // Set the source to trigger loading
         img.src = url;
       });
     } catch (error) {
       console.error('Error converting image to data URL:', error);
-      // Return a placeholder image
       return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
     }
   };
@@ -180,7 +164,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
     try {
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      // Add Roboto Condensed font
       pdf.addFont('https://fonts.gstatic.com/s/robotocondensed/v27/ieVl2ZhZI2eCN5jzbjEETS9weq8-19K7DQ.ttf', 'RobotoCondensed', 'normal');
       pdf.addFont('https://fonts.gstatic.com/s/robotocondensed/v27/ieVi2ZhZI2eCN5jzbjEETS9weq8-32meKCM.ttf', 'RobotoCondensed', 'bold');
       
@@ -188,48 +171,29 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 15;
       
-      // Get a city image
       const cityImageUrl = await getCityImage(trip.city || '', trip.country || '');
-      
-      // Convert the image URL to a data URL
       const cityImageDataUrl = await loadImageAsDataUrl(cityImageUrl);
       
-      // Add cover page with image
       pdf.addImage(cityImageDataUrl, 'JPEG', 0, 0, pageWidth, pageHeight);
       
-      // Add overlay for better text visibility
       pdf.setFillColor(0, 0, 0);
-      // Fix for setGState error - Use setAlpha instead
-      pdf.setAlpha(0.5);
+      pdf.setGState({ opacity: 0.5 });
       pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-      pdf.setAlpha(1.0);
-      
-      // Add title text
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFont("RobotoCondensed", "bold");
-      pdf.setFontSize(40);
+      pdf.setGState({ opacity: 1.0 });
       
       const titleText = trip.title.toUpperCase();
       const titleWidth = pdf.getStringUnitWidth(titleText) * 40 / pdf.internal.scaleFactor;
       const titleX = (pageWidth - titleWidth) / 2;
       pdf.text(titleText, titleX, pageHeight / 2 - 30);
       
-      // Add subtitle
-      pdf.setFont("RobotoCondensed", "normal");
-      pdf.setFontSize(18);
       const subtitleText = `${trip.city}, ${trip.country}`;
       const subtitleWidth = pdf.getStringUnitWidth(subtitleText) * 18 / pdf.internal.scaleFactor;
       const subtitleX = (pageWidth - subtitleWidth) / 2;
       pdf.text(subtitleText, subtitleX, pageHeight / 2 - 15);
       
-      // Add line separator
       pdf.setDrawColor(255, 255, 255);
       pdf.setLineWidth(0.5);
       pdf.line(pageWidth/4, pageHeight/2 - 5, pageWidth*3/4, pageHeight/2 - 5);
-      
-      // Add introduction text - personalized for the itinerary
-      pdf.setFont("RobotoCondensed", "normal");
-      pdf.setFontSize(14);
       
       const introTextLines = [
         `Aqui está um roteiro detalhado para ${itinerary.length} dias em ${trip.city},`,
@@ -246,43 +210,33 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         yPos += 8;
       });
       
-      // Add dates
-      yPos += 10;
       const dateText = `${formatDate(trip.start_date || '')} - ${formatDate(trip.end_date || '')}`;
       const dateWidth = pdf.getStringUnitWidth(dateText) * 14 / pdf.internal.scaleFactor;
       const dateX = (pageWidth - dateWidth) / 2;
       pdf.text(dateText, dateX, yPos);
       
-      // Add people
-      yPos += 8;
       const peopleText = `${trip.num_people} pessoa${trip.num_people !== 1 ? 's' : ''}`;
       const peopleWidth = pdf.getStringUnitWidth(peopleText) * 14 / pdf.internal.scaleFactor;
       const peopleX = (pageWidth - peopleWidth) / 2;
       pdf.text(peopleText, peopleX, yPos);
       
-      // Add page number
       pdf.setFontSize(10);
       pdf.text("Página 1 de " + (itinerary.length + 1), pageWidth - 40, pageHeight - 10);
       
-      // Special content for Paris - rich content example
       const isParis = trip.city?.toLowerCase() === "paris";
       
-      // Generate pages for each day
       for (let i = 0; i < itinerary.length; i++) {
         const day = itinerary[i];
         
         pdf.addPage();
         let yPosition = margin;
         
-        // Create a light purple gradient background
         pdf.setFillColor(250, 245, 255);
         pdf.rect(0, 0, pageWidth, pageHeight, 'F');
         
-        // Day header with dark purple background
         pdf.setFillColor(106, 27, 154);
         pdf.rect(margin, yPosition, pageWidth - 2 * margin, 25, 'F');
         
-        // Day title with theme
         pdf.setTextColor(255, 255, 255);
         pdf.setFont("RobotoCondensed", "bold");
         pdf.setFontSize(20);
@@ -292,11 +246,9 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           dayTitle += ` - ${formatDate(day.date)}`;
         }
         
-        // Add theme if available
         if (day.theme) {
           dayTitle += ` - ${day.theme.toUpperCase()}`;
         } else if (isParis) {
-          // Special themes for Paris itinerary
           if (day.day === 1) {
             dayTitle += " - CLÁSSICOS DE PARIS";
           } else if (day.day === 2) {
@@ -310,11 +262,10 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         
         yPosition += 35;
         
-        // Morning section
         pdf.setTextColor(106, 27, 154);
         pdf.setFontSize(18);
+        pdf.setFont("RobotoCondensed", "bold");
         pdf.text("Manhã", margin, yPosition);
-        pdf.setLineWidth(0.5);
         pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
         
         yPosition += 15;
@@ -322,7 +273,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setFont("RobotoCondensed", "normal");
         pdf.setFontSize(12);
         
-        // Loop through morning points of interest
         for (let poiIndex = 0; poiIndex < day.morning.length; poiIndex++) {
           const poi = day.morning[poiIndex];
           
@@ -330,11 +280,9 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           pdf.text(`${poiIndex + 1}. ${poi.name} (${poi.openingHours || ''})`, margin, yPosition);
           yPosition += 8;
           
-          // Get and add image for POI
           const poiImageUrl = await getImageForAttraction(poi.name, poi.type?.toLowerCase() || 'attraction');
           const poiDataUrl = await loadImageAsDataUrl(poiImageUrl);
           
-          // Add image
           const imageWidth = 60;
           const imageHeight = 36;
           pdf.addImage(poiDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
@@ -343,7 +291,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           pdf.setFont("RobotoCondensed", "normal");
           
-          // Add description with indentation
           if (poi.description) {
             const descriptionLines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
             descriptionLines.forEach(line => {
@@ -352,13 +299,11 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             });
           }
           
-          // Add ticket price if available
           if (poi.ticketPrice) {
             pdf.text(`    Dica: ${poi.ticketPrice}`, margin, yPosition);
             yPosition += 6;
           }
           
-          // Add address if available
           if (poi.address) {
             pdf.text(`    Endereço: ${poi.address}`, margin, yPosition);
             yPosition += 6;
@@ -367,9 +312,8 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           yPosition += 6;
         }
         
-        // Lunch section
         yPosition += 10;
-        pdf.setTextColor(233, 112, 13); // Orange for food sections
+        pdf.setTextColor(233, 112, 13);
         pdf.setFontSize(18);
         pdf.setFont("RobotoCondensed", "bold");
         pdf.text("Almoço", margin, yPosition);
@@ -387,11 +331,9 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           pdf.text(lunchTitle, margin, yPosition);
           yPosition += 8;
           
-          // Add restaurant image
           const restaurantImageUrl = await getImageForAttraction(day.lunch.name, 'restaurant');
           const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
           
-          // Add image
           const imageWidth = 60;
           const imageHeight = 36;
           pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
@@ -400,7 +342,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           pdf.setFont("RobotoCondensed", "normal");
           
-          // Add description with indentation
           if (day.lunch.description) {
             const descriptionLines = pdf.splitTextToSize(day.lunch.description, pageWidth - 2 * margin - 10);
             descriptionLines.forEach(line => {
@@ -409,7 +350,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             });
           }
           
-          // Add cuisine and price level
           if (day.lunch.cuisine) {
             pdf.text(`    Cozinha: ${day.lunch.cuisine}`, margin, yPosition);
             yPosition += 6;
@@ -420,7 +360,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             yPosition += 6;
           }
           
-          // Add address if available
           if (day.lunch.address) {
             pdf.text(`    Endereço: ${day.lunch.address}`, margin, yPosition);
             yPosition += 6;
@@ -431,7 +370,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           yPosition += 6;
         }
         
-        // Afternoon section
         yPosition += 10;
         pdf.setTextColor(106, 27, 154);
         pdf.setFontSize(18);
@@ -443,7 +381,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setTextColor(50, 50, 50);
         pdf.setFontSize(12);
         
-        // Loop through afternoon points of interest
         for (let poiIndex = 0; poiIndex < day.afternoon.length; poiIndex++) {
           const poi = day.afternoon[poiIndex];
           
@@ -451,11 +388,9 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           pdf.text(`${poiIndex + 3}. ${poi.name} (${poi.openingHours || ''})`, margin, yPosition);
           yPosition += 8;
           
-          // Get and add image for POI
           const poiImageUrl = await getImageForAttraction(poi.name, poi.type?.toLowerCase() || 'attraction');
           const poiDataUrl = await loadImageAsDataUrl(poiImageUrl);
           
-          // Add image
           const imageWidth = 60;
           const imageHeight = 36;
           pdf.addImage(poiDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
@@ -464,7 +399,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           pdf.setFont("RobotoCondensed", "normal");
           
-          // Add description with indentation
           if (poi.description) {
             const descriptionLines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
             descriptionLines.forEach(line => {
@@ -473,13 +407,11 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             });
           }
           
-          // Add ticket price if available
           if (poi.ticketPrice) {
             pdf.text(`    Dica: ${poi.ticketPrice}`, margin, yPosition);
             yPosition += 6;
           }
           
-          // Add address if available
           if (poi.address) {
             pdf.text(`    Endereço: ${poi.address}`, margin, yPosition);
             yPosition += 6;
@@ -488,9 +420,8 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           yPosition += 6;
         }
         
-        // Dinner section
         yPosition += 10;
-        pdf.setTextColor(233, 112, 13); // Orange for food sections
+        pdf.setTextColor(233, 112, 13);
         pdf.setFontSize(18);
         pdf.setFont("RobotoCondensed", "bold");
         pdf.text("Jantar", margin, yPosition);
@@ -508,11 +439,9 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           pdf.text(dinnerTitle, margin, yPosition);
           yPosition += 8;
           
-          // Add restaurant image
           const restaurantImageUrl = await getImageForAttraction(day.dinner.name, 'restaurant');
           const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
           
-          // Add image
           const imageWidth = 60;
           const imageHeight = 36;
           pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
@@ -521,7 +450,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           pdf.setFont("RobotoCondensed", "normal");
           
-          // Add description with indentation
           if (day.dinner.description) {
             const descriptionLines = pdf.splitTextToSize(day.dinner.description, pageWidth - 2 * margin - 10);
             descriptionLines.forEach(line => {
@@ -530,7 +458,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             });
           }
           
-          // Add cuisine and price level
           if (day.dinner.cuisine) {
             pdf.text(`    Cozinha: ${day.dinner.cuisine}`, margin, yPosition);
             yPosition += 6;
@@ -541,7 +468,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             yPosition += 6;
           }
           
-          // Add address if available
           if (day.dinner.address) {
             pdf.text(`    Endereço: ${day.dinner.address}`, margin, yPosition);
             yPosition += 6;
@@ -552,7 +478,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           yPosition += 6;
         }
         
-        // Add extra tips for Paris on the last day
         if (isParis && day.day === itinerary.length) {
           yPosition += 10;
           pdf.setTextColor(106, 27, 154);
@@ -577,12 +502,10 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           });
         }
         
-        // Add page number
         pdf.setFontSize(10);
         pdf.text(`Página ${i + 2} de ${itinerary.length + 1}`, pageWidth - 40, pageHeight - 10);
       }
       
-      // Save the PDF
       pdf.save(`Roteiro_${trip.title.replace(/\s+/g, "_")}.pdf`);
       
       toast({
