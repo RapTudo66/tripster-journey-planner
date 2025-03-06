@@ -28,7 +28,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
 
   const getCityImage = async (city: string, country: string): Promise<string> => {
     try {
-      // Try to get a city image from Unsplash API
       const unsplashResponse = await fetch(
         `https://source.unsplash.com/1600x900/?${city},${country},landmark`
       );
@@ -40,8 +39,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       throw new Error('Failed to fetch image');
     } catch (error) {
       console.error('Error fetching city image:', error);
-      // Return a placeholder image URL if the fetch fails
-      return 'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&h=900&q=80';
+      return 'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=1600&h=900&q=80';
     }
   };
 
@@ -52,14 +50,15 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
     });
 
     try {
-      // Add Roboto Condensed font to the PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Add Roboto Condensed font
       pdf.addFont('https://fonts.gstatic.com/s/robotocondensed/v27/ieVl2ZhZI2eCN5jzbjEETS9weq8-19K7DQ.ttf', 'RobotoCondensed', 'normal');
       pdf.addFont('https://fonts.gstatic.com/s/robotocondensed/v27/ieVi2ZhZI2eCN5jzbjEETS9weq8-32meKCM.ttf', 'RobotoCondensed', 'bold');
       
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
+      const margin = 15;
       
       // Get a city image
       const cityImageUrl = await getCityImage(trip.city || '', trip.country || '');
@@ -81,20 +80,16 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       if (ctx) {
         ctx.drawImage(img, 0, 0);
         
-        // Add title page with image
+        // Add cover page with image
         const imgData = canvas.toDataURL('image/jpeg');
-        
-        // First page - Cover with image
         pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
         
-        // Add a semi-transparent overlay for better text visibility
+        // Add overlay for better text visibility
         pdf.setFillColor(0, 0, 0);
-        // Fix: Don't use 'new' with setGState
         pdf.setGState({opacity: 0.5});
         pdf.rect(0, 0, pageWidth, pageHeight, 'F');
         
         // Reset opacity
-        // Fix: Don't use 'new' with setGState
         pdf.setGState({opacity: 1.0});
         
         // Add title text
@@ -107,256 +102,221 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         const titleX = (pageWidth - titleWidth) / 2;
         pdf.text(titleText, titleX, pageHeight / 2 - 20);
         
+        // Add introduction text
         pdf.setFont("RobotoCondensed", "normal");
-        pdf.setFontSize(18);
+        pdf.setFontSize(16);
+        const introText = `Aqui está um roteiro detalhado para ${itinerary.length} dias em ${trip.city},`;
+        const introText2 = "cobrindo pontos turísticos icônicos, restaurantes recomendados";
+        const introText3 = "e dicas para aproveitar ao máximo a cidade.";
         
-        const cityText = `${trip.city || ''}, ${trip.country || ''}`;
-        const cityWidth = pdf.getStringUnitWidth(cityText) * 18 / pdf.internal.scaleFactor;
-        const cityX = (pageWidth - cityWidth) / 2;
-        pdf.text(cityText, cityX, pageHeight / 2);
+        const introWidth = pdf.getStringUnitWidth(introText) * 16 / pdf.internal.scaleFactor;
+        const introX = (pageWidth - introWidth) / 2;
+        pdf.text(introText, introX, pageHeight / 2 + 10);
         
+        const intro2Width = pdf.getStringUnitWidth(introText2) * 16 / pdf.internal.scaleFactor;
+        const intro2X = (pageWidth - intro2Width) / 2;
+        pdf.text(introText2, intro2X, pageHeight / 2 + 20);
+        
+        const intro3Width = pdf.getStringUnitWidth(introText3) * 16 / pdf.internal.scaleFactor;
+        const intro3X = (pageWidth - intro3Width) / 2;
+        pdf.text(introText3, intro3X, pageHeight / 2 + 30);
+        
+        // Add dates and people
         const dateText = `${formatDate(trip.start_date || '')} - ${formatDate(trip.end_date || '')}`;
-        const dateWidth = pdf.getStringUnitWidth(dateText) * 18 / pdf.internal.scaleFactor;
+        const dateWidth = pdf.getStringUnitWidth(dateText) * 16 / pdf.internal.scaleFactor;
         const dateX = (pageWidth - dateWidth) / 2;
-        pdf.text(dateText, dateX, pageHeight / 2 + 10);
+        pdf.text(dateText, dateX, pageHeight / 2 + 50);
         
-        const numPeopleText = `${trip.num_people} pessoa${trip.num_people !== 1 ? 's' : ''}`;
-        const peopleWidth = pdf.getStringUnitWidth(numPeopleText) * 18 / pdf.internal.scaleFactor;
+        const peopleText = `${trip.num_people} pessoa${trip.num_people !== 1 ? 's' : ''}`;
+        const peopleWidth = pdf.getStringUnitWidth(peopleText) * 16 / pdf.internal.scaleFactor;
         const peopleX = (pageWidth - peopleWidth) / 2;
-        pdf.text(numPeopleText, peopleX, pageHeight / 2 + 20);
+        pdf.text(peopleText, peopleX, pageHeight / 2 + 60);
+        
+        // Add page number
+        pdf.setFontSize(10);
+        pdf.text("Página 1 de " + (itinerary.length + 1), pageWidth - 40, pageHeight - 10);
         
         // Generate pages for each day
-        let yPosition = 0;
-        
         for (let i = 0; i < itinerary.length; i++) {
           const day = itinerary[i];
           
-          // Add a new page for each day
           pdf.addPage();
-          yPosition = margin;
+          let yPosition = margin;
           
-          // Create a light gradient background
-          pdf.setFillColor(245, 246, 250);
+          // Create a light purple gradient background
+          pdf.setFillColor(250, 245, 255);
           pdf.rect(0, 0, pageWidth, pageHeight, 'F');
           
-          // Day header with a nicer color scheme
-          pdf.setFillColor(90, 78, 148);  // Deep purple
-          pdf.rect(margin, yPosition, pageWidth - 2 * margin, 20, 'F');
+          // Day header with dark purple background
+          pdf.setFillColor(90, 78, 148);
+          pdf.rect(margin, yPosition, pageWidth - 2 * margin, 25, 'F');
           
+          // Day title
           pdf.setTextColor(255, 255, 255);
           pdf.setFont("RobotoCondensed", "bold");
-          pdf.setFontSize(16);
-          pdf.text(`Dia ${day.day} - ${formatDate(day.date)}`, margin + 5, yPosition + 13);
+          pdf.setFontSize(20);
+          pdf.text(`DIA ${day.day} - ${formatDate(day.date)}`, margin + 5, yPosition + 16);
           
-          yPosition += 30;
+          yPosition += 35;
           
-          // Morning section with improved styling
-          pdf.setDrawColor(90, 78, 148);  // Deep purple
-          pdf.setLineWidth(0.8);
-          
-          pdf.setTextColor(90, 78, 148);  // Deep purple
-          pdf.setFontSize(14);
+          // Morning section
+          pdf.setTextColor(90, 78, 148);
+          pdf.setFontSize(18);
           pdf.text("Manhã", margin, yPosition);
-          pdf.line(margin + 45, yPosition - 2, pageWidth - margin, yPosition - 2);
+          pdf.setLineWidth(0.5);
+          pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
           
-          yPosition += 10;
-          pdf.setTextColor(50, 50, 50);  // Dark gray for better readability
+          yPosition += 15;
+          pdf.setTextColor(60, 60, 60);
           pdf.setFont("RobotoCondensed", "normal");
           pdf.setFontSize(12);
           
-          if (day.morning.length > 0) {
-            for (const poi of day.morning) {
-              // Add a subtle background for each activity
-              pdf.setFillColor(237, 238, 246);
-              pdf.roundedRect(margin - 2, yPosition - 4, pageWidth - 2 * margin + 4, 25, 2, 2, 'F');
-              
-              pdf.setFont("RobotoCondensed", "bold");
-              pdf.text(poi.name, margin, yPosition);
+          for (const poi of day.morning) {
+            pdf.setFont("RobotoCondensed", "bold");
+            pdf.text(`• ${poi.name}`, margin, yPosition);
+            yPosition += 6;
+            
+            pdf.setFont("RobotoCondensed", "normal");
+            if (poi.description) {
+              const lines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
+              lines.forEach(line => {
+                pdf.text(`  ${line}`, margin, yPosition);
+                yPosition += 6;
+              });
+            }
+            
+            if (poi.openingHours) {
+              pdf.text(`  Horário: ${poi.openingHours}`, margin, yPosition);
               yPosition += 6;
-              
-              pdf.setFont("RobotoCondensed", "normal");
-              pdf.text(`Tipo: ${poi.type}`, margin, yPosition);
-              
-              if (poi.openingHours) {
-                pdf.text(`Horário: ${poi.openingHours}`, margin + 70, yPosition);
-              }
-              
+            }
+            
+            if (poi.ticketPrice) {
+              pdf.text(`  Ingresso: ${poi.ticketPrice}`, margin, yPosition);
               yPosition += 6;
-              
-              if (poi.ticketPrice) {
-                pdf.text(`Preço: ${poi.ticketPrice}`, margin, yPosition);
-              }
-              
+            }
+            
+            if (poi.address) {
+              pdf.text(`  Endereço: ${poi.address}`, margin, yPosition);
               yPosition += 10;
             }
-          } else {
-            pdf.text("Tempo livre para explorar a cidade.", margin, yPosition);
-            yPosition += 10;
           }
           
-          // Lunch section with improved styling
-          if (yPosition > pageHeight - 60) {
-            pdf.addPage();
-            
-            // Continue the light gradient background
-            pdf.setFillColor(245, 246, 250);
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-            
-            yPosition = margin;
-          }
-          
-          yPosition += 5;
-          pdf.setTextColor(233, 164, 80);  // Warm orange for meals
-          pdf.setFontSize(14);
+          // Lunch section
+          yPosition += 10;
+          pdf.setTextColor(233, 164, 80);
+          pdf.setFontSize(18);
           pdf.setFont("RobotoCondensed", "bold");
           pdf.text("Almoço", margin, yPosition);
-          pdf.setDrawColor(233, 164, 80);
-          pdf.line(margin + 45, yPosition - 2, pageWidth - margin, yPosition - 2);
+          pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
           
-          yPosition += 10;
-          pdf.setTextColor(50, 50, 50);
-          pdf.setFont("RobotoCondensed", "normal");
+          yPosition += 15;
+          pdf.setTextColor(60, 60, 60);
           pdf.setFontSize(12);
           
           if (day.lunch) {
-            // Add a subtle background for the meal
-            pdf.setFillColor(249, 237, 226);
-            pdf.roundedRect(margin - 2, yPosition - 4, pageWidth - 2 * margin + 4, 25, 2, 2, 'F');
-            
             pdf.setFont("RobotoCondensed", "bold");
             pdf.text(day.lunch.name, margin, yPosition);
             yPosition += 6;
             
             pdf.setFont("RobotoCondensed", "normal");
             pdf.text(`Cozinha: ${day.lunch.cuisine}`, margin, yPosition);
-            pdf.text(`Preço: ${day.lunch.priceLevel}`, margin + 80, yPosition);
+            yPosition += 6;
+            pdf.text(`Preço: ${day.lunch.priceLevel}`, margin, yPosition);
             yPosition += 6;
             
             if (day.lunch.rating) {
               pdf.text(`Avaliação: ${day.lunch.rating}/5`, margin, yPosition);
+              yPosition += 6;
             }
             
-            yPosition += 10;
-          } else {
-            pdf.text("Sugestão: explore restaurantes locais.", margin, yPosition);
-            yPosition += 10;
-          }
-          
-          // Afternoon section with improved styling
-          if (yPosition > pageHeight - 60) {
-            pdf.addPage();
-            
-            // Continue the light gradient background
-            pdf.setFillColor(245, 246, 250);
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-            
-            yPosition = margin;
-          }
-          
-          yPosition += 5;
-          pdf.setTextColor(90, 78, 148);  // Deep purple
-          pdf.setFontSize(14);
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("Tarde", margin, yPosition);
-          pdf.setDrawColor(90, 78, 148);
-          pdf.line(margin + 45, yPosition - 2, pageWidth - margin, yPosition - 2);
-          
-          yPosition += 10;
-          pdf.setTextColor(50, 50, 50);
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.setFontSize(12);
-          
-          if (day.afternoon.length > 0) {
-            for (const poi of day.afternoon) {
-              // Add a subtle background for each activity
-              pdf.setFillColor(237, 238, 246);
-              pdf.roundedRect(margin - 2, yPosition - 4, pageWidth - 2 * margin + 4, 25, 2, 2, 'F');
-              
-              pdf.setFont("RobotoCondensed", "bold");
-              pdf.text(poi.name, margin, yPosition);
-              yPosition += 6;
-              
-              pdf.setFont("RobotoCondensed", "normal");
-              pdf.text(`Tipo: ${poi.type}`, margin, yPosition);
-              
-              if (poi.openingHours) {
-                pdf.text(`Horário: ${poi.openingHours}`, margin + 70, yPosition);
-              }
-              
-              yPosition += 6;
-              
-              if (poi.ticketPrice) {
-                pdf.text(`Preço: ${poi.ticketPrice}`, margin, yPosition);
-              }
-              
+            if (day.lunch.address) {
+              pdf.text(`Endereço: ${day.lunch.address}`, margin, yPosition);
               yPosition += 10;
             }
-          } else {
-            pdf.text("Tempo livre para explorar a cidade.", margin, yPosition);
-            yPosition += 10;
           }
           
-          // Dinner section with improved styling
-          if (yPosition > pageHeight - 60) {
-            pdf.addPage();
+          // Afternoon section
+          yPosition += 10;
+          pdf.setTextColor(90, 78, 148);
+          pdf.setFontSize(18);
+          pdf.setFont("RobotoCondensed", "bold");
+          pdf.text("Tarde", margin, yPosition);
+          pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
+          
+          yPosition += 15;
+          pdf.setTextColor(60, 60, 60);
+          pdf.setFontSize(12);
+          
+          for (const poi of day.afternoon) {
+            pdf.setFont("RobotoCondensed", "bold");
+            pdf.text(`• ${poi.name}`, margin, yPosition);
+            yPosition += 6;
             
-            // Continue the light gradient background
-            pdf.setFillColor(245, 246, 250);
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+            pdf.setFont("RobotoCondensed", "normal");
+            if (poi.description) {
+              const lines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
+              lines.forEach(line => {
+                pdf.text(`  ${line}`, margin, yPosition);
+                yPosition += 6;
+              });
+            }
             
-            yPosition = margin;
+            if (poi.openingHours) {
+              pdf.text(`  Horário: ${poi.openingHours}`, margin, yPosition);
+              yPosition += 6;
+            }
+            
+            if (poi.ticketPrice) {
+              pdf.text(`  Ingresso: ${poi.ticketPrice}`, margin, yPosition);
+              yPosition += 6;
+            }
+            
+            if (poi.address) {
+              pdf.text(`  Endereço: ${poi.address}`, margin, yPosition);
+              yPosition += 10;
+            }
           }
           
-          yPosition += 5;
-          pdf.setTextColor(233, 164, 80);  // Warm orange for meals
-          pdf.setFontSize(14);
+          // Dinner section
+          yPosition += 10;
+          pdf.setTextColor(233, 164, 80);
+          pdf.setFontSize(18);
           pdf.setFont("RobotoCondensed", "bold");
           pdf.text("Jantar", margin, yPosition);
-          pdf.setDrawColor(233, 164, 80);
-          pdf.line(margin + 45, yPosition - 2, pageWidth - margin, yPosition - 2);
+          pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
           
-          yPosition += 10;
-          pdf.setTextColor(50, 50, 50);
-          pdf.setFont("RobotoCondensed", "normal");
+          yPosition += 15;
+          pdf.setTextColor(60, 60, 60);
           pdf.setFontSize(12);
           
           if (day.dinner) {
-            // Add a subtle background for the meal
-            pdf.setFillColor(249, 237, 226);
-            pdf.roundedRect(margin - 2, yPosition - 4, pageWidth - 2 * margin + 4, 25, 2, 2, 'F');
-            
             pdf.setFont("RobotoCondensed", "bold");
             pdf.text(day.dinner.name, margin, yPosition);
             yPosition += 6;
             
             pdf.setFont("RobotoCondensed", "normal");
             pdf.text(`Cozinha: ${day.dinner.cuisine}`, margin, yPosition);
-            pdf.text(`Preço: ${day.dinner.priceLevel}`, margin + 80, yPosition);
+            yPosition += 6;
+            pdf.text(`Preço: ${day.dinner.priceLevel}`, margin, yPosition);
             yPosition += 6;
             
             if (day.dinner.rating) {
               pdf.text(`Avaliação: ${day.dinner.rating}/5`, margin, yPosition);
+              yPosition += 6;
             }
             
-            yPosition += 10;
-          } else {
-            pdf.text("Sugestão: explore restaurantes locais.", margin, yPosition);
-            yPosition += 10;
+            if (day.dinner.address) {
+              pdf.text(`Endereço: ${day.dinner.address}`, margin, yPosition);
+              yPosition += 10;
+            }
           }
           
-          // Add page number at the bottom
-          pdf.setTextColor(130, 130, 130);
+          // Add page number
           pdf.setFontSize(10);
           pdf.text(`Página ${i + 2} de ${itinerary.length + 1}`, pageWidth - 40, pageHeight - 10);
         }
         
-        // Add a footer to the cover page
-        pdf.setPage(1);
-        pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(10);
-        pdf.text("Página 1 de " + (itinerary.length + 1), pageWidth - 40, pageHeight - 10);
-        
-        // Download PDF
+        // Save the PDF
         pdf.save(`Roteiro_${trip.title.replace(/\s+/g, "_")}.pdf`);
         
         toast({
