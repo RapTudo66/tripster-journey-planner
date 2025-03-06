@@ -46,8 +46,12 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
     "Arco do Triunfo": "https://images.unsplash.com/photo-1511739172509-0e5b94a8e9a9?auto=format&fit=crop&q=80&w=500&h=300",
     "Champs-Élysées": "https://images.unsplash.com/photo-1552308243-d8ceb9ce1ae2?auto=format&fit=crop&q=80&w=500&h=300",
     "Moulin Rouge": "https://images.unsplash.com/photo-1555636222-cae8c8ab2e2d?auto=format&fit=crop&q=80&w=500&h=300",
-    "La Défense": "https://images.unsplash.com/photo-1601049676869-9character=0ad19008f?auto=format&fit=crop&q=80&w=500&h=300",
+    "La Défense": "https://images.unsplash.com/photo-1593159426340-9396c3dc4ba3?auto=format&fit=crop&q=80&w=500&h=300",
     "Jardim de Luxemburgo": "https://images.unsplash.com/photo-1558177585-761f38c631bb?auto=format&fit=crop&q=80&w=500&h=300",
+    "Catedral de Notre-Dame e Île de la Cité": "https://images.unsplash.com/photo-1584266337025-b45ee5ea0e8f?auto=format&fit=crop&q=80&w=500&h=300",
+    "Passeio pelo Quartier Latin": "https://images.unsplash.com/photo-1551999570-57c3a9611984?auto=format&fit=crop&q=80&w=500&h=300",
+    "Montmartre e Basílica de Sacré-Cœur": "https://images.unsplash.com/photo-1555425748-831a8289f2c9?auto=format&fit=crop&q=80&w=500&h=300",
+    "Champs-Élysées e Arco do Triunfo": "https://images.unsplash.com/photo-1552308243-d8ceb9ce1ae2?auto=format&fit=crop&q=80&w=500&h=300",
     
     // Restaurants in Paris
     "Le Café Marly": "https://images.unsplash.com/photo-1560624052-3423b279830c?auto=format&fit=crop&q=80&w=500&h=300",
@@ -195,11 +199,10 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       
       // Add overlay for better text visibility
       pdf.setFillColor(0, 0, 0);
-      pdf.setGState({opacity: 0.5});
+      // Fix for setGState error - Use setAlpha instead
+      pdf.setAlpha(0.5);
       pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-      
-      // Reset opacity
-      pdf.setGState({opacity: 1.0});
+      pdf.setAlpha(1.0);
       
       // Add title text
       pdf.setTextColor(255, 255, 255);
@@ -276,7 +279,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.rect(0, 0, pageWidth, pageHeight, 'F');
         
         // Day header with dark purple background
-        pdf.setFillColor(106, 27, 154); // Deeper purple for better contrast
+        pdf.setFillColor(106, 27, 154);
         pdf.rect(margin, yPosition, pageWidth - 2 * margin, 25, 'F');
         
         // Day title with theme
@@ -284,10 +287,16 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setFont("RobotoCondensed", "bold");
         pdf.setFontSize(20);
         
-        let dayTitle = `DIA ${day.day} - ${formatDate(day.date)}`;
+        let dayTitle = `DIA ${day.day}`;
+        if (day.date) {
+          dayTitle += ` - ${formatDate(day.date)}`;
+        }
         
-        // Special themes for Paris itinerary
-        if (isParis) {
+        // Add theme if available
+        if (day.theme) {
+          dayTitle += ` - ${day.theme.toUpperCase()}`;
+        } else if (isParis) {
+          // Special themes for Paris itinerary
           if (day.day === 1) {
             dayTitle += " - CLÁSSICOS DE PARIS";
           } else if (day.day === 2) {
@@ -302,7 +311,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         yPosition += 35;
         
         // Morning section
-        pdf.setTextColor(106, 27, 154); // Use same purple for consistency
+        pdf.setTextColor(106, 27, 154);
         pdf.setFontSize(18);
         pdf.text("Manhã", margin, yPosition);
         pdf.setLineWidth(0.5);
@@ -313,182 +322,49 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setFont("RobotoCondensed", "normal");
         pdf.setFontSize(12);
         
-        // Special content for Paris Day 1 morning
-        if (isParis && day.day === 1) {
-          // Torre Eiffel
+        // Loop through morning points of interest
+        for (let poiIndex = 0; poiIndex < day.morning.length; poiIndex++) {
+          const poi = day.morning[poiIndex];
+          
           pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("1. Torre Eiffel (08h30 - 10h00)", margin, yPosition);
+          pdf.text(`${poiIndex + 1}. ${poi.name} (${poi.openingHours || ''})`, margin, yPosition);
           yPosition += 8;
           
-          // Get and add image for Torre Eiffel
-          const eiffelImageUrl = await getImageForAttraction("Torre Eiffel", "monument");
-          const eiffelDataUrl = await loadImageAsDataUrl(eiffelImageUrl);
-          
-          // Add image with proper positioning
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(eiffelDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const towerDesc = [
-            "    Chegue cedo para evitar filas. Suba até o segundo andar ou vá até o topo para uma vista panorâmica incrível.",
-            "    Dica: Reserve ingressos antecipadamente no site oficial.",
-            "    Endereço: Champ de Mars, 5 Av. Anatole France, 75007 Paris"
-          ];
-          
-          towerDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-          
-          yPosition += 6;
-          
-          // Louvre
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("2. Museu do Louvre (10h30 - 13h30)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image for Louvre
-          const louvreImageUrl = await getImageForAttraction("Museu do Louvre", "museum");
-          const louvreDataUrl = await loadImageAsDataUrl(louvreImageUrl);
-          
-          // Add image
-          pdf.addImage(louvreDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const louvreDesc = [
-            "    Visite a Mona Lisa, a Vênus de Milo e outras obras icônicas.",
-            "    Dica: Foque nas alas que mais te interessam para otimizar o tempo.",
-            "    Endereço: Rue de Rivoli, 75001 Paris"
-          ];
-          
-          louvreDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Special content for Paris Day 2 morning
-        else if (isParis && day.day === 2) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("1. Museu d'Orsay (09h00 - 11h00)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image for Museu d'Orsay
-          const orsayImageUrl = await getImageForAttraction("Museu d'Orsay", "museum");
-          const orsayDataUrl = await loadImageAsDataUrl(orsayImageUrl);
+          // Get and add image for POI
+          const poiImageUrl = await getImageForAttraction(poi.name, poi.type?.toLowerCase() || 'attraction');
+          const poiDataUrl = await loadImageAsDataUrl(poiImageUrl);
           
           // Add image
           const imageWidth = 60;
           const imageHeight = 36;
-          pdf.addImage(orsayDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
+          pdf.addImage(poiDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
           
           yPosition += imageHeight + 5;
           
           pdf.setFont("RobotoCondensed", "normal");
-          const orsayDesc = [
-            "    Impressionismo e pós-impressionismo: Van Gogh, Monet e Renoir.",
-            "    Endereço: 1 Rue de la Légion d'Honneur, 75007"
-          ];
           
-          orsayDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-          
-          yPosition += 6;
-          
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("2. Jardim de Luxemburgo (11h30 - 12h30)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image for Jardim de Luxemburgo
-          const luxemburgImageUrl = await getImageForAttraction("Jardim de Luxemburgo", "park");
-          const luxemburgDataUrl = await loadImageAsDataUrl(luxemburgImageUrl);
-          
-          // Add image
-          pdf.addImage(luxemburgDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.text("    Passeio relaxante pelo jardim mais elegante de Paris.", margin, yPosition);
-          yPosition += 6;
-        }
-        // Special content for Paris Day 3 morning
-        else if (isParis && day.day === 3) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("1. Palácio de Versalhes (08h30 - 12h30)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image for Palácio de Versalhes
-          const versaillesImageUrl = await getImageForAttraction("Palácio de Versalhes", "monument");
-          const versaillesDataUrl = await loadImageAsDataUrl(versaillesImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(versaillesDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const versaillesDesc = [
-            "    Destaques: Salão dos Espelhos, Jardins e o Petit Trianon.",
-            "    Dica: Pegue o RER C cedo para evitar multidões.",
-            "    Endereço: Place d'Armes, 78000 Versailles"
-          ];
-          
-          versaillesDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Default content for other cities or days
-        else {
-          for (const poi of day.morning) {
-            pdf.setFont("RobotoCondensed", "bold");
-            pdf.text(`• ${poi.name}`, margin, yPosition);
-            yPosition += 6;
-            
-            // Get and add image for the POI
-            const poiImageUrl = await getImageForAttraction(poi.name);
-            const poiDataUrl = await loadImageAsDataUrl(poiImageUrl);
-            
-            // Add image
-            const imageWidth = 60;
-            const imageHeight = 36;
-            pdf.addImage(poiDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-            
-            yPosition += imageHeight + 5;
-            
-            pdf.setFont("RobotoCondensed", "normal");
-            if (poi.description) {
-              const lines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
-              lines.forEach(line => {
-                pdf.text(`  ${line}`, margin, yPosition);
-                yPosition += 6;
-              });
-            }
-            
-            if (poi.openingHours) {
-              pdf.text(`  Horário: ${poi.openingHours}`, margin, yPosition);
+          // Add description with indentation
+          if (poi.description) {
+            const descriptionLines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
+            descriptionLines.forEach(line => {
+              pdf.text(`    ${line}`, margin, yPosition);
               yPosition += 6;
-            }
-            
-            if (poi.ticketPrice) {
-              pdf.text(`  Ingresso: ${poi.ticketPrice}`, margin, yPosition);
-              yPosition += 6;
-            }
-            
-            if (poi.address) {
-              pdf.text(`  Endereço: ${poi.address}`, margin, yPosition);
-              yPosition += 10;
-            }
+            });
           }
+          
+          // Add ticket price if available
+          if (poi.ticketPrice) {
+            pdf.text(`    Dica: ${poi.ticketPrice}`, margin, yPosition);
+            yPosition += 6;
+          }
+          
+          // Add address if available
+          if (poi.address) {
+            pdf.text(`    Endereço: ${poi.address}`, margin, yPosition);
+            yPosition += 6;
+          }
+          
+          yPosition += 6;
         }
         
         // Lunch section
@@ -503,14 +379,16 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setTextColor(50, 50, 50);
         pdf.setFontSize(12);
         
-        // Special lunch for Paris Day 1
-        if (isParis && day.day === 1) {
+        if (day.lunch) {
           pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("Le Café Marly (No Louvre, vista para a pirâmide)", margin, yPosition);
+          const lunchTitle = day.lunch.openingHours 
+            ? `${day.lunch.name} (${day.lunch.openingHours})`
+            : day.lunch.name;
+          pdf.text(lunchTitle, margin, yPosition);
           yPosition += 8;
           
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction("Le Café Marly", "restaurant");
+          // Add restaurant image
+          const restaurantImageUrl = await getImageForAttraction(day.lunch.name, 'restaurant');
           const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
           
           // Add image
@@ -521,108 +399,36 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           yPosition += imageHeight + 5;
           
           pdf.setFont("RobotoCondensed", "normal");
-          const lunchDesc = [
-            "    Sugestão: Steak tartare ou salada Niçoise.",
-            "    Preço médio: €€€"
-          ];
           
-          lunchDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Special lunch for Paris Day 2
-        else if (isParis && day.day === 2) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("Les Deux Magots (Café histórico frequentado por Sartre e Hemingway)", margin, yPosition);
-          yPosition += 8;
+          // Add description with indentation
+          if (day.lunch.description) {
+            const descriptionLines = pdf.splitTextToSize(day.lunch.description, pageWidth - 2 * margin - 10);
+            descriptionLines.forEach(line => {
+              pdf.text(`    ${line}`, margin, yPosition);
+              yPosition += 6;
+            });
+          }
           
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction("Les Deux Magots", "restaurant");
-          const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const lunchDesc = [
-            "    Sugestão: Croque-monsieur ou quiche Lorraine.",
-            "    Preço médio: €€€"
-          ];
-          
-          lunchDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Special lunch for Paris Day 3
-        else if (isParis && day.day === 3) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("La Petite Venise (Nos jardins de Versalhes)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction("La Petite Venise", "restaurant");
-          const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const lunchDesc = [
-            "    Sugestão: Peixe grelhado com legumes ou risoto.",
-            "    Preço médio: €€€"
-          ];
-          
-          lunchDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Default lunch content
-        else if (day.lunch) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text(day.lunch.name, margin, yPosition);
-          yPosition += 6;
-          
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction(day.lunch.name, "restaurant");
-          const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.text(`Cozinha: ${day.lunch.cuisine}`, margin, yPosition);
-          yPosition += 6;
-          pdf.text(`Preço: ${day.lunch.priceLevel}`, margin, yPosition);
-          yPosition += 6;
-          
-          if (day.lunch.rating) {
-            pdf.text(`Avaliação: ${day.lunch.rating}/5`, margin, yPosition);
+          // Add cuisine and price level
+          if (day.lunch.cuisine) {
+            pdf.text(`    Cozinha: ${day.lunch.cuisine}`, margin, yPosition);
             yPosition += 6;
           }
           
+          if (day.lunch.priceLevel) {
+            pdf.text(`    Preço médio: ${day.lunch.priceLevel}`, margin, yPosition);
+            yPosition += 6;
+          }
+          
+          // Add address if available
           if (day.lunch.address) {
-            pdf.text(`Endereço: ${day.lunch.address}`, margin, yPosition);
-            yPosition += 10;
+            pdf.text(`    Endereço: ${day.lunch.address}`, margin, yPosition);
+            yPosition += 6;
           }
         } else {
           pdf.setFont("RobotoCondensed", "italic");
           pdf.text("Sugestão: explore restaurantes locais.", margin, yPosition);
-          yPosition += 10;
+          yPosition += 6;
         }
         
         // Afternoon section
@@ -637,172 +443,49 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setTextColor(50, 50, 50);
         pdf.setFontSize(12);
         
-        // Special content for Paris Day 1 afternoon
-        if (isParis && day.day === 1) {
+        // Loop through afternoon points of interest
+        for (let poiIndex = 0; poiIndex < day.afternoon.length; poiIndex++) {
+          const poi = day.afternoon[poiIndex];
+          
           pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("3. Catedral de Notre-Dame e Île de la Cité (15h30 - 16h30)", margin, yPosition);
+          pdf.text(`${poiIndex + 3}. ${poi.name} (${poi.openingHours || ''})`, margin, yPosition);
           yPosition += 8;
           
-          // Get and add image
-          const notreImageUrl = await getImageForAttraction("Catedral de Notre-Dame", "church");
-          const notreDataUrl = await loadImageAsDataUrl(notreImageUrl);
+          // Get and add image for POI
+          const poiImageUrl = await getImageForAttraction(poi.name, poi.type?.toLowerCase() || 'attraction');
+          const poiDataUrl = await loadImageAsDataUrl(poiImageUrl);
           
           // Add image
           const imageWidth = 60;
           const imageHeight = 36;
-          pdf.addImage(notreDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
+          pdf.addImage(poiDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
           
           yPosition += imageHeight + 5;
           
           pdf.setFont("RobotoCondensed", "normal");
-          pdf.text("    Caminhada pela Île de la Cité e visita à Catedral (se reaberta após restauração).", margin, yPosition);
-          yPosition += 6;
-          pdf.text("    Endereço: Parvis Notre-Dame - Pl. Jean-Paul II, 75004", margin, yPosition);
-          yPosition += 10;
           
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("4. Passeio pelo Quartier Latin (16h45 - 18h00)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image
-          const latinImageUrl = await getImageForAttraction("Quartier Latin", "attraction");
-          const latinDataUrl = await loadImageAsDataUrl(latinImageUrl);
-          
-          // Add image
-          pdf.addImage(latinDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.text("    Explore a Rue de la Huchette, o Panthéon e a Sorbonne.", margin, yPosition);
-          yPosition += 10;
-        }
-        // Special content for Paris Day 2 afternoon
-        else if (isParis && day.day === 2) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("3. Montmartre e Basílica de Sacré-Cœur (14h30 - 17h00)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image
-          const montmartreImageUrl = await getImageForAttraction("Montmartre", "attraction");
-          const montmartreDataUrl = await loadImageAsDataUrl(montmartreImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(montmartreDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const montmartreDesc = [
-            "    Suba até a Sacré-Cœur para uma vista incrível da cidade.",
-            "    Passeie pela Place du Tertre e veja artistas de rua."
-          ];
-          
-          montmartreDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-          
-          yPosition += 4;
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("4. Moulin Rouge (17h30 - 18h00)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image
-          const moulinImageUrl = await getImageForAttraction("Moulin Rouge", "attraction");
-          const moulinDataUrl = await loadImageAsDataUrl(moulinImageUrl);
-          
-          // Add image
-          pdf.addImage(moulinDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.text("    Foto na icônica fachada do cabaré mais famoso do mundo.", margin, yPosition);
-          yPosition += 10;
-        }
-        // Special content for Paris Day 3 afternoon
-        else if (isParis && day.day === 3) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("2. La Défense (15h30 - 17h00)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image
-          const defenseImageUrl = await getImageForAttraction("La Défense", "attraction");
-          const defenseDataUrl = await loadImageAsDataUrl(defenseImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(defenseDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.text("    Bairro moderno com arranha-céus e o Grande Arco.", margin, yPosition);
-          yPosition += 10;
-          
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("3. Champs-Élysées e Arco do Triunfo (17h30 - 19h00)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image
-          const arcImageUrl = await getImageForAttraction("Arco do Triunfo", "monument");
-          const arcDataUrl = await loadImageAsDataUrl(arcImageUrl);
-          
-          // Add image
-          pdf.addImage(arcDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.text("    Caminhada pela avenida mais famosa de Paris até o Arco do Triunfo.", margin, yPosition);
-          yPosition += 10;
-        }
-        // Default afternoon content
-        else {
-          for (const poi of day.afternoon) {
-            pdf.setFont("RobotoCondensed", "bold");
-            pdf.text(`• ${poi.name}`, margin, yPosition);
-            yPosition += 6;
-            
-            // Get and add image for the POI
-            const poiImageUrl = await getImageForAttraction(poi.name);
-            const poiDataUrl = await loadImageAsDataUrl(poiImageUrl);
-            
-            // Add image
-            const imageWidth = 60;
-            const imageHeight = 36;
-            pdf.addImage(poiDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-            
-            yPosition += imageHeight + 5;
-            
-            pdf.setFont("RobotoCondensed", "normal");
-            if (poi.description) {
-              const lines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
-              lines.forEach(line => {
-                pdf.text(`  ${line}`, margin, yPosition);
-                yPosition += 6;
-              });
-            }
-            
-            if (poi.openingHours) {
-              pdf.text(`  Horário: ${poi.openingHours}`, margin, yPosition);
+          // Add description with indentation
+          if (poi.description) {
+            const descriptionLines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
+            descriptionLines.forEach(line => {
+              pdf.text(`    ${line}`, margin, yPosition);
               yPosition += 6;
-            }
-            
-            if (poi.ticketPrice) {
-              pdf.text(`  Ingresso: ${poi.ticketPrice}`, margin, yPosition);
-              yPosition += 6;
-            }
-            
-            if (poi.address) {
-              pdf.text(`  Endereço: ${poi.address}`, margin, yPosition);
-              yPosition += 10;
-            }
+            });
           }
+          
+          // Add ticket price if available
+          if (poi.ticketPrice) {
+            pdf.text(`    Dica: ${poi.ticketPrice}`, margin, yPosition);
+            yPosition += 6;
+          }
+          
+          // Add address if available
+          if (poi.address) {
+            pdf.text(`    Endereço: ${poi.address}`, margin, yPosition);
+            yPosition += 6;
+          }
+          
+          yPosition += 6;
         }
         
         // Dinner section
@@ -817,14 +500,16 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setTextColor(50, 50, 50);
         pdf.setFontSize(12);
         
-        // Special dinner for Paris Day 1
-        if (isParis && day.day === 1) {
+        if (day.dinner) {
           pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("Le Procope (Restaurante histórico desde 1686)", margin, yPosition);
+          const dinnerTitle = day.dinner.openingHours 
+            ? `${day.dinner.name} (${day.dinner.openingHours})`
+            : day.dinner.name;
+          pdf.text(dinnerTitle, margin, yPosition);
           yPosition += 8;
           
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction("Le Procope", "restaurant");
+          // Add restaurant image
+          const restaurantImageUrl = await getImageForAttraction(day.dinner.name, 'restaurant');
           const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
           
           // Add image
@@ -835,111 +520,36 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           yPosition += imageHeight + 5;
           
           pdf.setFont("RobotoCondensed", "normal");
-          const dinnerDesc = [
-            "    Sugestão: Coq au vin ou sopa de cebola.",
-            "    Preço médio: €€€"
-          ];
           
-          dinnerDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Special dinner for Paris Day 2
-        else if (isParis && day.day === 2) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("Opções para a noite (20h00 - 23h00)", margin, yPosition);
-          yPosition += 8;
+          // Add description with indentation
+          if (day.dinner.description) {
+            const descriptionLines = pdf.splitTextToSize(day.dinner.description, pageWidth - 2 * margin - 10);
+            descriptionLines.forEach(line => {
+              pdf.text(`    ${line}`, margin, yPosition);
+              yPosition += 6;
+            });
+          }
           
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction("La Mère Catherine", "restaurant");
-          const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const dinnerOptions = [
-            "    Opção 1: Jantar no La Mère Catherine (Montmartre, €€€)",
-            "        Pratos clássicos franceses, como confit de pato.",
-            "",
-            "    Opção 2: Show no Moulin Rouge (€€€€)",
-            "        Espetáculo famoso com jantar opcional."
-          ];
-          
-          dinnerOptions.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Special dinner for Paris Day 3
-        else if (isParis && day.day === 3) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text("Le Train Bleu (Restaurante Belle Époque na Gare de Lyon)", margin, yPosition);
-          yPosition += 8;
-          
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction("Le Train Bleu", "restaurant");
-          const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          const dinnerDesc = [
-            "    Sugestão: Filet mignon ao molho de trufas.",
-            "    Preço médio: €€€€"
-          ];
-          
-          dinnerDesc.forEach(line => {
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-        // Default dinner content
-        else if (day.dinner) {
-          pdf.setFont("RobotoCondensed", "bold");
-          pdf.text(day.dinner.name, margin, yPosition);
-          yPosition += 6;
-          
-          // Get and add image for restaurant
-          const restaurantImageUrl = await getImageForAttraction(day.dinner.name, "restaurant");
-          const restaurantDataUrl = await loadImageAsDataUrl(restaurantImageUrl);
-          
-          // Add image
-          const imageWidth = 60;
-          const imageHeight = 36;
-          pdf.addImage(restaurantDataUrl, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-          
-          yPosition += imageHeight + 5;
-          
-          pdf.setFont("RobotoCondensed", "normal");
-          pdf.text(`Cozinha: ${day.dinner.cuisine}`, margin, yPosition);
-          yPosition += 6;
-          pdf.text(`Preço: ${day.dinner.priceLevel}`, margin, yPosition);
-          yPosition += 6;
-          
-          if (day.dinner.rating) {
-            pdf.text(`Avaliação: ${day.dinner.rating}/5`, margin, yPosition);
+          // Add cuisine and price level
+          if (day.dinner.cuisine) {
+            pdf.text(`    Cozinha: ${day.dinner.cuisine}`, margin, yPosition);
             yPosition += 6;
           }
           
+          if (day.dinner.priceLevel) {
+            pdf.text(`    Preço médio: ${day.dinner.priceLevel}`, margin, yPosition);
+            yPosition += 6;
+          }
+          
+          // Add address if available
           if (day.dinner.address) {
-            pdf.text(`Endereço: ${day.dinner.address}`, margin, yPosition);
-            yPosition += 10;
+            pdf.text(`    Endereço: ${day.dinner.address}`, margin, yPosition);
+            yPosition += 6;
           }
         } else {
           pdf.setFont("RobotoCondensed", "italic");
           pdf.text("Sugestão: explore restaurantes locais.", margin, yPosition);
-          yPosition += 10;
+          yPosition += 6;
         }
         
         // Add extra tips for Paris on the last day
