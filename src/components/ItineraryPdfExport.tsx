@@ -89,11 +89,13 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         
         // Add a semi-transparent overlay for better text visibility
         pdf.setFillColor(0, 0, 0);
-        pdf.setGState(new pdf.GState({ opacity: 0.5 }));
+        // Fix: Don't use 'new' with setGState
+        pdf.setGState({opacity: 0.5});
         pdf.rect(0, 0, pageWidth, pageHeight, 'F');
         
         // Reset opacity
-        pdf.setGState(new pdf.GState({ opacity: 1.0 }));
+        // Fix: Don't use 'new' with setGState
+        pdf.setGState({opacity: 1.0});
         
         // Add title text
         pdf.setTextColor(255, 255, 255);
