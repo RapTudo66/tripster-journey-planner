@@ -1,6 +1,7 @@
+
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
-import { ItineraryDay } from "@/lib/supabase";
+import { ItineraryDay } from "@/lib/supabase/types";
 import { formatDate } from "@/utils/dateUtils";
 import { useToast } from "@/components/ui/use-toast";
 import html2canvas from "html2canvas";
