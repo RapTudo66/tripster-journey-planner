@@ -74,18 +74,11 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         return "/lovable-uploads/4766d627-1aec-4187-b6e3-b353bba4fce0.png";
       }
       
-      const unsplashResponse = await fetch(
-        `https://source.unsplash.com/1600x900/?${city},${country},landmark`
-      );
-      
-      if (unsplashResponse.ok) {
-        return unsplashResponse.url;
-      }
-      
-      throw new Error('Failed to fetch image');
+      // Use a static fallback image instead of trying to fetch from unsplash
+      return '/lovable-uploads/8bc4f161-5a19-49b2-8432-f2e47d594c89.png';
     } catch (error) {
       console.error('Error fetching city image:', error);
-      return 'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=1600&h=900&q=80';
+      return '/lovable-uploads/8bc4f161-5a19-49b2-8432-f2e47d594c89.png';
     }
   };
 
@@ -165,8 +158,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
     try {
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      pdf.addFont('https://fonts.gstatic.com/s/robotocondensed/v27/ieVl2ZhZI2eCN5jzbjEETS9weq8-19K7DQ.ttf', 'RobotoCondensed', 'normal');
-      pdf.addFont('https://fonts.gstatic.com/s/robotocondensed/v27/ieVi2ZhZI2eCN5jzbjEETS9weq8-32meKCM.ttf', 'RobotoCondensed', 'bold');
+      // Removed problematic font loading
       
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -177,10 +169,15 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       
       pdf.addImage(cityImageDataUrl, 'JPEG', 0, 0, pageWidth, pageHeight);
       
+      // Set black overlay with opacity
       pdf.setFillColor(0, 0, 0);
-      pdf.setGState({ opacity: 0.5 });
+      pdf.setGlobalAlpha(0.5);
       pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-      pdf.setGState({ opacity: 1.0 });
+      pdf.setGlobalAlpha(1.0);
+      
+      // Set text color to white for cover page
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(40);
       
       const titleText = trip.title.toUpperCase();
       const titleWidth = pdf.getStringUnitWidth(titleText) * 40 / pdf.internal.scaleFactor;
@@ -188,6 +185,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       pdf.text(titleText, titleX, pageHeight / 2 - 30);
       
       const subtitleText = `${trip.city}, ${trip.country}`;
+      pdf.setFontSize(18);
       const subtitleWidth = pdf.getStringUnitWidth(subtitleText) * 18 / pdf.internal.scaleFactor;
       const subtitleX = (pageWidth - subtitleWidth) / 2;
       pdf.text(subtitleText, subtitleX, pageHeight / 2 - 15);
@@ -203,6 +201,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       ];
       
       let yPos = pageHeight / 2 + 10;
+      pdf.setFontSize(14);
       
       introTextLines.forEach(line => {
         const introWidth = pdf.getStringUnitWidth(line) * 14 / pdf.internal.scaleFactor;
@@ -214,18 +213,19 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
       const dateText = `${formatDate(trip.start_date || '')} - ${formatDate(trip.end_date || '')}`;
       const dateWidth = pdf.getStringUnitWidth(dateText) * 14 / pdf.internal.scaleFactor;
       const dateX = (pageWidth - dateWidth) / 2;
-      pdf.text(dateText, dateX, yPos);
+      pdf.text(dateText, dateX, yPos + 8);
       
       const peopleText = `${trip.num_people} pessoa${trip.num_people !== 1 ? 's' : ''}`;
       const peopleWidth = pdf.getStringUnitWidth(peopleText) * 14 / pdf.internal.scaleFactor;
       const peopleX = (pageWidth - peopleWidth) / 2;
-      pdf.text(peopleText, peopleX, yPos);
+      pdf.text(peopleText, peopleX, yPos + 16);
       
       pdf.setFontSize(10);
       pdf.text("Página 1 de " + (itinerary.length + 1), pageWidth - 40, pageHeight - 10);
       
       const isParis = trip.city?.toLowerCase() === "paris";
       
+      // Generate pages for each day of the itinerary
       for (let i = 0; i < itinerary.length; i++) {
         const day = itinerary[i];
         
@@ -239,7 +239,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.rect(margin, yPosition, pageWidth - 2 * margin, 25, 'F');
         
         pdf.setTextColor(255, 255, 255);
-        pdf.setFont("RobotoCondensed", "bold");
         pdf.setFontSize(20);
         
         let dayTitle = `DIA ${day.day}`;
@@ -265,19 +264,17 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         
         pdf.setTextColor(106, 27, 154);
         pdf.setFontSize(18);
-        pdf.setFont("RobotoCondensed", "bold");
         pdf.text("Manhã", margin, yPosition);
         pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
         
         yPosition += 15;
         pdf.setTextColor(50, 50, 50);
-        pdf.setFont("RobotoCondensed", "normal");
         pdf.setFontSize(12);
         
         for (let poiIndex = 0; poiIndex < day.morning.length; poiIndex++) {
           const poi = day.morning[poiIndex];
           
-          pdf.setFont("RobotoCondensed", "bold");
+          pdf.setFontSize(14);
           pdf.text(`${poiIndex + 1}. ${poi.name} (${poi.openingHours || ''})`, margin, yPosition);
           yPosition += 8;
           
@@ -290,7 +287,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           yPosition += imageHeight + 5;
           
-          pdf.setFont("RobotoCondensed", "normal");
+          pdf.setFontSize(12);
           
           if (poi.description) {
             const descriptionLines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
@@ -316,7 +313,6 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         yPosition += 10;
         pdf.setTextColor(233, 112, 13);
         pdf.setFontSize(18);
-        pdf.setFont("RobotoCondensed", "bold");
         pdf.text("Almoço", margin, yPosition);
         pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
         
@@ -325,7 +321,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setFontSize(12);
         
         if (day.lunch) {
-          pdf.setFont("RobotoCondensed", "bold");
+          pdf.setFontSize(14);
           const lunchTitle = day.lunch.openingHours 
             ? `${day.lunch.name} (${day.lunch.openingHours})`
             : day.lunch.name;
@@ -341,7 +337,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           yPosition += imageHeight + 5;
           
-          pdf.setFont("RobotoCondensed", "normal");
+          pdf.setFontSize(12);
           
           if (day.lunch.description) {
             const descriptionLines = pdf.splitTextToSize(day.lunch.description, pageWidth - 2 * margin - 10);
@@ -366,15 +362,15 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             yPosition += 6;
           }
         } else {
-          pdf.setFont("RobotoCondensed", "italic");
+          pdf.setFontStyle("italic");
           pdf.text("Sugestão: explore restaurantes locais.", margin, yPosition);
           yPosition += 6;
         }
         
+        // Adding afternoon section with same pattern as morning
         yPosition += 10;
         pdf.setTextColor(106, 27, 154);
         pdf.setFontSize(18);
-        pdf.setFont("RobotoCondensed", "bold");
         pdf.text("Tarde", margin, yPosition);
         pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
         
@@ -385,7 +381,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         for (let poiIndex = 0; poiIndex < day.afternoon.length; poiIndex++) {
           const poi = day.afternoon[poiIndex];
           
-          pdf.setFont("RobotoCondensed", "bold");
+          pdf.setFontSize(14);
           pdf.text(`${poiIndex + 3}. ${poi.name} (${poi.openingHours || ''})`, margin, yPosition);
           yPosition += 8;
           
@@ -398,7 +394,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           yPosition += imageHeight + 5;
           
-          pdf.setFont("RobotoCondensed", "normal");
+          pdf.setFontSize(12);
           
           if (poi.description) {
             const descriptionLines = pdf.splitTextToSize(poi.description, pageWidth - 2 * margin - 10);
@@ -421,10 +417,10 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           yPosition += 6;
         }
         
+        // Adding dinner section
         yPosition += 10;
         pdf.setTextColor(233, 112, 13);
         pdf.setFontSize(18);
-        pdf.setFont("RobotoCondensed", "bold");
         pdf.text("Jantar", margin, yPosition);
         pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
         
@@ -433,7 +429,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
         pdf.setFontSize(12);
         
         if (day.dinner) {
-          pdf.setFont("RobotoCondensed", "bold");
+          pdf.setFontSize(14);
           const dinnerTitle = day.dinner.openingHours 
             ? `${day.dinner.name} (${day.dinner.openingHours})`
             : day.dinner.name;
@@ -449,7 +445,7 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
           
           yPosition += imageHeight + 5;
           
-          pdf.setFont("RobotoCondensed", "normal");
+          pdf.setFontSize(12);
           
           if (day.dinner.description) {
             const descriptionLines = pdf.splitTextToSize(day.dinner.description, pageWidth - 2 * margin - 10);
@@ -474,16 +470,16 @@ export const ItineraryPdfExport = ({ trip, itinerary }: ItineraryPdfExportProps)
             yPosition += 6;
           }
         } else {
-          pdf.setFont("RobotoCondensed", "italic");
+          pdf.setFontStyle("italic");
           pdf.text("Sugestão: explore restaurantes locais.", margin, yPosition);
           yPosition += 6;
         }
         
+        // Extra tips on last day
         if (isParis && day.day === itinerary.length) {
           yPosition += 10;
           pdf.setTextColor(106, 27, 154);
           pdf.setFontSize(16);
-          pdf.setFont("RobotoCondensed", "bold");
           pdf.text("Dicas Extras", margin, yPosition);
           pdf.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
           
